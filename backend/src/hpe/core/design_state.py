@@ -24,6 +24,8 @@ import uuid
 from dataclasses import asdict, dataclass, field
 from typing import Any, Optional
 
+from hpe.core.enums import DesignMode
+
 # ---------------------------------------------------------------------------
 # Constraints (the "intent" the design must satisfy)
 # ---------------------------------------------------------------------------
@@ -112,6 +114,7 @@ class DesignState:
 
     operating_point: dict
     constraints: DesignConstraints = field(default_factory=DesignConstraints)
+    mode: DesignMode = DesignMode.CLASSIC
 
     # Accumulated stage outputs (each a plain dict for serialisation).
     sizing: Optional[dict] = None
@@ -130,11 +133,13 @@ class DesignState:
         cls,
         op: Any,
         constraints: Optional[DesignConstraints] = None,
+        mode: DesignMode = DesignMode.CLASSIC,
     ) -> "DesignState":
         """Build a fresh state from an OperatingPoint (object or dict)."""
         return cls(
             operating_point=_to_op_dict(op),
             constraints=constraints or DesignConstraints(),
+            mode=mode,
         )
 
     # -- recording stage results ------------------------------------------
@@ -243,6 +248,7 @@ class DesignState:
         report = self.evaluate_constraints()
         return {
             "id": self.id,
+            "mode": self.mode.value,
             "operating_point": {
                 "Q_m3h": round(_num(op.get("flow_rate", 0.0)) * 3600, 2),
                 "H_m": _num(op.get("head")),
@@ -258,6 +264,7 @@ class DesignState:
     def to_dict(self) -> dict:
         return {
             "id": self.id,
+            "mode": self.mode.value,
             "operating_point": self.operating_point,
             "constraints": self.constraints.to_dict(),
             "sizing": self.sizing,
@@ -273,6 +280,7 @@ class DesignState:
         return cls(
             operating_point=data.get("operating_point", {}),
             constraints=DesignConstraints(**(data.get("constraints") or {})),
+            mode=DesignMode(data.get("mode", DesignMode.CLASSIC.value)),
             sizing=data.get("sizing"),
             geometry=data.get("geometry"),
             physics=data.get("physics"),

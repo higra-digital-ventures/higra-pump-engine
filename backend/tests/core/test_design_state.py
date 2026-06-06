@@ -154,3 +154,14 @@ def test_summary_shape():
 
 def test_stages_constant_order():
     assert STAGES == ("sizing", "geometry", "physics", "surrogate", "cfd")
+
+
+def test_mode_defaults_classic_and_roundtrips():
+    from hpe.core.enums import DesignMode
+    st = DesignState.from_operating_point(_op())
+    assert st.mode == DesignMode.CLASSIC
+    st_free = DesignState.from_operating_point(_op(), mode=DesignMode.FREE)
+    restored = DesignState.from_dict(st_free.to_dict())
+    assert restored.mode == DesignMode.FREE
+    assert st_free.to_dict()["mode"] == "free"
+    assert st_free.summary()["mode"] == "free"
