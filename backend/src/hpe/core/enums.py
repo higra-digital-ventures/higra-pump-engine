@@ -52,3 +52,17 @@ class GeometryFormat(str, Enum):
     STEP = "step"
     IGES = "iges"
     STL = "stl"
+
+
+class DesignMode(str, Enum):
+    """Design paradigm selected for a project.
+
+    CLASSIC : parametric B-rep geometry (CadQuery/OCCT) — production pumps,
+              clean STEP/IGES export, body-fitted turbo meshing.
+    FREE    : generative / implicit geometry (SDF/voxel, Noyron/PicoGK style) —
+              topology emerges from intent + constraints; targets additive
+              manufacturing and complex internal channels. Experimental.
+    """
+
+    CLASSIC = "classic"
+    FREE = "free"
