@@ -58,12 +58,18 @@ def test_backends_conform_to_protocol():
 
 
 # ---------------------------------------------------------------------------
-# implicit backend is an honest stub
+# implicit backend (M3) — produces a voxel field artifact
 # ---------------------------------------------------------------------------
 
-def test_implicit_backend_not_implemented(sizing_result):
-    with pytest.raises(NotImplementedError):
-        ImplicitBackend().generate(sizing_result)
+def test_implicit_backend_generates_voxel_artifact(sizing_result):
+    art = ImplicitBackend().generate(sizing_result, export=False)
+    assert art.backend == "implicit"
+    assert art.mesh_strategy == "cut_cell"
+    # Voxel statistics are always produced (numpy only).
+    vox = art.extra["voxel"]
+    assert vox["inside_voxels"] > 0
+    assert len(vox["grid_shape"]) == 3
+    assert art.params["blade_count"] >= 1
 
 
 # ---------------------------------------------------------------------------

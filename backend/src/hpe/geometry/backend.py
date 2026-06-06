@@ -159,10 +159,12 @@ class ParametricBackend:
 # ---------------------------------------------------------------------------
 
 class ImplicitBackend:
-    """Free/generative geometry via implicit SDF/voxel fields (planned).
+    """Free/generative geometry via implicit SDF/voxel fields (M3 prototype).
 
-    Advertises its planned capabilities so the UI and CFD pipeline can already
-    branch on them, but generation is not implemented yet (see roadmap M3+).
+    Builds a prototype bladed disk as a signed-distance field, samples it onto a
+    voxel grid, and (when scikit-image is available) extracts an STL via marching
+    cubes. Pure-numpy otherwise — the voxel field + statistics are always
+    produced. This is a feasibility prototype, not a production impeller.
     """
 
     name = "implicit"
@@ -174,6 +176,9 @@ class ImplicitBackend:
         mesh_strategy="cut_cell",
     )
 
+    #: Default voxel resolution per axis (kept modest for speed).
+    resolution = 48
+
     def generate(
         self,
         sizing: Any,
@@ -182,10 +187,46 @@ class ImplicitBackend:
         export: bool = False,
         run_id: Optional[str] = None,
     ) -> GeometryArtifact:
-        raise NotImplementedError(
-            "Implicit (free/generative) geometry backend is not implemented yet "
-            "(roadmap M3). Use DesignMode.CLASSIC for now."
+        try:
+            from hpe.geometry.implicit.builder import build_impeller_sdf
+            from hpe.geometry.implicit.field import sample, surface_mesh, write_stl
+        except Exception as exc:  # noqa: BLE001 — numpy missing, etc.
+            raise NotImplementedError(f"Implicit backend unavailable: {exc}")
+
+        solid, meta, bounds = build_impeller_sdf(sizing)
+        field = sample(solid, bounds, resolution=self.resolution)
+        stats = field.stats()
+
+        artifact = GeometryArtifact(
+            backend=self.name,
+            params=meta,
+            mesh_strategy=self.capabilities.mesh_strategy,
+            extra={"voxel": stats, "resolution": self.resolution},
         )
+
+        mesh = surface_mesh(field)
+        if mesh is None:
+            artifact.warnings.append(
+                "STL surface extraction skipped (scikit-image not installed); "
+                "voxel field + statistics produced."
+            )
+        elif export and output_dir:
+            import uuid
+            from pathlib import Path
+            verts, faces = mesh
+            stl_path = str(Path(output_dir) / f"implicit_{run_id or uuid.uuid4().hex}.stl")
+            write_stl(verts, faces, stl_path)
+            artifact.cad_available = True
+            artifact.step_path = None
+            artifact.extra["stl_path"] = stl_path
+            artifact.extra["n_vertices"] = int(len(verts))
+            artifact.extra["n_faces"] = int(len(faces))
+        else:
+            verts, faces = mesh
+            artifact.extra["n_vertices"] = int(len(verts))
+            artifact.extra["n_faces"] = int(len(faces))
+
+        return artifact
 
 
 # ---------------------------------------------------------------------------

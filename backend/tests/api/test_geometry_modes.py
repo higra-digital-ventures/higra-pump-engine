@@ -41,11 +41,14 @@ def test_generate_classic_mode(client):
     assert "geometry" in body["summary"]["stages_run"]
 
 
-def test_generate_free_mode_not_implemented(client):
+def test_generate_free_mode_produces_voxel(client):
     r = client.post("/api/v1/geometry/generate",
                     json={"Q": 0.05, "H": 30.0, "n": 1750, "mode": "free"})
-    assert r.status_code == 501
-    assert "not implemented" in r.json()["detail"].lower()
+    assert r.status_code == 200
+    body = r.json()
+    assert body["backend"] == "implicit"
+    assert body["mesh_strategy"] == "cut_cell"
+    assert body["artifact"]["extra"]["voxel"]["inside_voxels"] > 0
 
 
 def test_generate_unknown_mode_422(client):

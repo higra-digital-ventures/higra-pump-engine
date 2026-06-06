@@ -87,6 +87,11 @@ visualization = [
     "matplotlib>=3.8",
 ]
 
+# Free/generative (implicit SDF) geometry — marching cubes for STL export.
+implicit = [
+    "scikit-image>=0.22",
+]
+
 dev = [
     "pytest>=8.0",
     "pytest-cov>=4.1",
@@ -97,7 +102,7 @@ dev = [
 ]
 
 all = [
-    "higra-pump-engine[geometry,cfd,ai,optimization,visualization,dev]",
+    "higra-pump-engine[geometry,cfd,ai,optimization,visualization,implicit,dev]",
 ]
 
 [project.scripts]
