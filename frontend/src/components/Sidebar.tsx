@@ -1,70 +1,13 @@
 import React, { useState, useEffect } from 'react'
 import t, { setLang, getCurrentLang, type LangKey } from '../i18n'
+import {
+  type Tab, type Section, type NavSection,
+  sectionForTab, SUB_TABS, NAV_SECTIONS,
+} from '../navigation'
 
-/* ── Tab type — every sub-page the app can show ────────────────────────────── */
-export type Tab =
-  | 'overview' | 'results' | 'curves' | '3d' | 'velocity' | 'losses' | 'stress'
-  | 'compare' | 'assistant' | 'optimize' | 'loading' | 'pressure'
-  | 'multispeed' | 'meridional-editor' | 'spanwise'
-  | 'templates' | 'doe' | 'pareto' | 'lean-sweep' | 'lete'
-  | 'meridional-drag' | 'noise' | 'batch' | 'pipeline'
-  | 'cavitation' | 'cfd_sim' | 'benchmarks'
-
-/* ── Main sidebar sections (6 primary destinations) ────────────────────────── */
-export type Section = 'projects' | 'templates' | 'design' | 'geometry' | 'analysis' | 'optimization' | 'assistant'
-
-export function sectionForTab(tab: Tab): Section {
-  switch (tab) {
-    case 'overview': case 'results': case 'curves': case 'multispeed': return 'design'
-    case '3d': case 'meridional-drag': case 'meridional-editor': case 'lete': case 'lean-sweep': return 'geometry'
-    case 'velocity': case 'losses': case 'pressure': case 'loading':
-    case 'spanwise': case 'noise': case 'stress': case 'compare': case 'cavitation':
-    case 'benchmarks': return 'analysis'
-    case 'optimize': case 'pareto': case 'doe': case 'batch': case 'pipeline': case 'cfd_sim': return 'optimization'
-    case 'assistant': return 'assistant'
-    case 'templates': return 'templates'
-    default: return 'design'
-  }
-}
-
-export const SUB_TABS: Record<Section, { key: Tab; label: string }[]> = {
-  projects: [],
-  templates: [],
-  assistant: [],
-  design: [
-    { key: 'overview', label: 'Resumo' },
-    { key: 'results', label: 'Dimensionamento' },
-    { key: 'curves', label: 'Curvas H-Q' },
-    { key: 'multispeed', label: 'Multi-Velocidade' },
-  ],
-  geometry: [
-    { key: '3d', label: 'Rotor 3D' },
-    { key: 'meridional-drag', label: 'Editor Meridional' },
-    { key: 'meridional-editor', label: 'Meridional Avançado' },
-    { key: 'lete', label: 'LE / TE' },
-    { key: 'lean-sweep', label: 'Lean / Sweep / Bow' },
-  ],
-  analysis: [
-    { key: 'velocity', label: 'Velocidades' },
-    { key: 'losses', label: 'Perdas' },
-    { key: 'pressure', label: 'Pressão PS/SS' },
-    { key: 'loading', label: 'Carregamento rVθ' },
-    { key: 'spanwise', label: 'Spanwise' },
-    { key: 'noise', label: 'Ruído' },
-    { key: 'stress', label: 'Tensões' },
-    { key: 'compare', label: 'Comparação' },
-    { key: 'cavitation', label: 'Cavitação' },
-    { key: 'benchmarks', label: 'Benchmarks' },
-  ],
-  optimization: [
-    { key: 'optimize', label: 'NSGA-II / Bayesian' },
-    { key: 'pareto', label: 'Fronteira Pareto' },
-    { key: 'doe', label: 'DoE / Surrogate' },
-    { key: 'batch', label: 'Batch / Paramétrico' },
-    { key: 'pipeline', label: 'Pipeline Completo' },
-    { key: 'cfd_sim', label: 'Simulação CFD' },
-  ],
-}
+/* Re-exported for components that still import these from './Sidebar'. */
+export { sectionForTab, SUB_TABS }
+export type { Tab, Section }
 
 /* ── Props ─────────────────────────────────────────────────────────────────── */
 interface Props {
@@ -78,32 +21,17 @@ interface Props {
   warningCount?: number
 }
 
-/* ── SVG icon helper ───────────────────────────────────────────────────────── */
+/* ── SVG icon helper — supports multi-subpath `d` strings ──────────────────── */
 const I = ({ d }: { d: string }) => (
-  <svg viewBox="0 0 24 24"><path d={d} /></svg>
+  <svg viewBox="0 0 24 24">
+    {d.split(' M').map((seg, i) => (
+      <path key={i} d={i === 0 ? seg : `M${seg}`} />
+    ))}
+  </svg>
 )
 
-/* ── Sidebar nav items ─────────────────────────────────────────────────────── */
-interface SidebarItem {
-  key: Section
-  label: string
-  icon: React.ReactNode
-  defaultTab?: Tab
-  isPage?: 'projects'
-  description?: string
-}
-
-const NAV_ITEMS: SidebarItem[] = [
-  { key: 'projects', label: t.navProjects, isPage: 'projects',
-    description: 'Gerenciar projetos salvos e criar novos',
-    icon: <I d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z" /> },
-  { key: 'analysis', label: 'Análise', defaultTab: 'velocity',
-    description: 'Velocidades, perdas, pressão, ruído e comparação',
-    icon: <I d="M3 12h4l3-9 4 18 3-9h4" /> },
-  { key: 'optimization', label: 'Otimização', defaultTab: 'optimize',
-    description: 'NSGA-II, Bayesian, DoE, Pareto e batch paramétrico',
-    icon: <I d="M13 10V3L4 14h7v7l9-11h-7z" /> },
-]
+/* Nav items come straight from the central config — all sections are shown. */
+const NAV_ITEMS: NavSection[] = NAV_SECTIONS
 
 /* ── Component ─────────────────────────────────────────────────────────────── */
 
@@ -113,31 +41,7 @@ export default function Sidebar({
 
   const activeSection = activeTab ? sectionForTab(activeTab) : (page === 'projects' ? 'projects' : 'design')
 
-  /* ── Simple / Advanced mode toggle (#1) ───────────────────────────────── */
-  const SIMPLE_SECTIONS: Section[] = ['projects']
-  const [mode, setMode] = useState<'simple' | 'advanced'>(() =>
-    (localStorage.getItem('hpe_mode') as 'simple' | 'advanced') || 'simple'
-  )
-  const toggleMode = () => {
-    const next = mode === 'simple' ? 'advanced' : 'simple'
-    setMode(next)
-    localStorage.setItem('hpe_mode', next)
-  }
-
-  /* ── Unexplored features counter (feature #3) ─────────────────────────── */
-  const [visited, setVisited] = useState<Set<string>>(() => {
-    try { return new Set(JSON.parse(localStorage.getItem('hpe_visited_tabs') || '[]')) } catch { return new Set() }
-  })
-
-  const handleClick = (item: SidebarItem) => {
-    if (item.defaultTab) {
-      setVisited(prev => {
-        const next = new Set(prev)
-        next.add(item.key)
-        localStorage.setItem('hpe_visited_tabs', JSON.stringify([...next]))
-        return next
-      })
-    }
+  const handleClick = (item: NavSection) => {
     if (item.isPage === 'projects') {
       onNavigate('projects')
     } else if (item.defaultTab) {
@@ -145,16 +49,10 @@ export default function Sidebar({
     }
   }
 
-  const totalSections = NAV_ITEMS.filter(i => i.key !== 'projects').length
-  const unvisited = totalSections - visited.size
-
-  // Show design items only when not on projects page, filter by mode
-  const allItems = page === 'projects'
+  // On the projects page only "Projetos" is relevant; on design show all sections.
+  const visibleItems = page === 'projects'
     ? NAV_ITEMS.filter(i => i.key === 'projects')
     : NAV_ITEMS
-  const visibleItems = mode === 'simple' && page !== 'projects'
-    ? allItems.filter(i => SIMPLE_SECTIONS.includes(i.key))
-    : allItems
 
   return (
     <div className={`sidebar${isCollapsed ? ' collapsed' : ''}`}>
@@ -162,33 +60,7 @@ export default function Sidebar({
       <div className="sidebar-header">
         <div className="logo-icon">H</div>
         {!isCollapsed && <span className="logo-text">HPE</span>}
-        {!isCollapsed && unvisited > 0 && page === 'design' && (
-          <span style={{
-            marginLeft: 'auto', background: 'var(--accent)', color: '#fff',
-            borderRadius: '50%', width: 18, height: 18, fontSize: 10, fontWeight: 700,
-            display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0,
-          }} title={`${unvisited} seções não exploradas`}>{unvisited}</span>
-        )}
       </div>
-
-      {/* Simple / Advanced mode toggle */}
-      {!isCollapsed && page === 'design' && (
-        <div style={{ padding: '4px 8px', display: 'flex', alignItems: 'center', gap: 6, fontSize: 10 }}>
-          <span style={{ color: mode === 'simple' ? 'var(--accent)' : 'var(--text-muted)' }}>Simples</span>
-          <div onClick={toggleMode} style={{
-            width: 32, height: 16, borderRadius: 8, cursor: 'pointer',
-            background: mode === 'advanced' ? 'var(--accent)' : 'var(--border-primary)',
-            position: 'relative', transition: 'background 0.2s',
-          }}>
-            <div style={{
-              width: 12, height: 12, borderRadius: 6, background: '#fff',
-              position: 'absolute', top: 2, transition: 'left 0.2s',
-              left: mode === 'advanced' ? 18 : 2,
-            }} />
-          </div>
-          <span style={{ color: mode === 'advanced' ? 'var(--accent)' : 'var(--text-muted)' }}>Avancado</span>
-        </div>
-      )}
 
       {/* ── Quick-access buttons (design mode only) ───────────────────── */}
       {page === 'design' && !isCollapsed && (
@@ -226,7 +98,7 @@ export default function Sidebar({
             title={isCollapsed ? item.label : (item.description || item.label)}
             style={{ position: 'relative' }}
           >
-            <span className="icon">{item.icon}</span>
+            <span className="icon"><I d={item.iconPath} /></span>
             {!isCollapsed && <span>{item.label}</span>}
             {item.key === 'design' && !!warningCount && warningCount > 0 && (
               <span style={{

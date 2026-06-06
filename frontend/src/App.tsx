@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react'
 import t from './i18n'
+import { type Tab, WIDE_TABS } from './navigation'
 import Layout from './components/Layout'
 import LoginPage from './pages/LoginPage'
 import ProjectsPage from './pages/ProjectsPage'
@@ -184,13 +185,7 @@ export interface CurvePoint {
 }
 
 type Page = 'login' | 'projects' | 'design'
-export type Tab =
-  | 'overview' | 'results' | 'curves' | '3d' | 'velocity' | 'losses' | 'stress'
-  | 'compare' | 'assistant' | 'optimize' | 'loading' | 'pressure'
-  | 'multispeed' | 'meridional-editor' | 'spanwise'
-  | 'templates' | 'doe' | 'pareto' | 'lean-sweep' | 'lete'
-  | 'meridional-drag' | 'noise' | 'batch' | 'pipeline'
-  | 'cavitation' | 'cfd_sim' | 'benchmarks'
+export type { Tab }
 
 export default function App() {
   const [page, setPage] = useState<Page>('login')
@@ -240,9 +235,7 @@ export default function App() {
   const [changeDiff, setChangeDiff] = useState<string | null>(null)
   // #16 — focus / form-panel collapsed
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false)
-  // #20 — new version banner
   const CURRENT_VERSION = '0.2.1'
-  const [newVersionBanner, setNewVersionBanner] = useState(false)
 
   // Dynamic favicon showing Nq value
   useDynamicFavicon(sizing?.specific_speed_nq || null)
@@ -277,10 +270,8 @@ export default function App() {
     if (saved) { setToken(saved); setPage('projects') }
   }, [])
 
-  // #20 — new version banner
+  // Track the last seen version (no intrusive banner — see WhatsNew modal).
   useEffect(() => {
-    const seen = localStorage.getItem('hpe_last_version')
-    if (seen && seen !== CURRENT_VERSION) setNewVersionBanner(true)
     localStorage.setItem('hpe_last_version', CURRENT_VERSION)
   }, [])
 
@@ -558,46 +549,22 @@ export default function App() {
       incrementSizingCount()
       logAction('Dimensionamento executado', `Q=${q} m3/h H=${h}m n=${n}rpm`)
 
-      // Proactive suggestions (#4) — delayed to not overlap loading toast
+      // Proactive engineering warnings — only actionable, physics-based hints.
+      // (Random "encouragement" / tutorial toasts were removed to cut UI noise.)
       setTimeout(() => {
         if (result.estimated_efficiency < 0.75) {
-          toast('eta abaixo de 75%. Tente aumentar o número de pás ou ajustar beta2.', 'warning')
+          toast('η abaixo de 75%. Tente aumentar o número de pás ou ajustar β₂.', 'warning')
         }
         if (result.estimated_npsh_r > 8) {
-          toast(`NPSHr=${result.estimated_npsh_r.toFixed(1)}m e alto. Reduza RPM para ~${Math.round(n * 0.85)}.`, 'warning')
+          toast(`NPSHr=${result.estimated_npsh_r.toFixed(1)}m está alto. Reduza RPM para ~${Math.round(n * 0.85)}.`, 'warning')
         }
         if (result.specific_speed_nq < 10) {
-          toast('Nq muito baixo -- considere multi-estágio ou aumente RPM.', 'info')
+          toast('Nq muito baixo — considere multi-estágio ou aumente RPM.', 'info')
         }
         if (result.specific_speed_nq > 200) {
-          toast('Nq alto -- considere bomba axial ou mixed-flow.', 'info')
+          toast('Nq alto — considere bomba axial ou mixed-flow.', 'info')
         }
-      }, 2000)
-
-      // Inline tutorial (#6) — compare with previous on 2nd-4th runs
-      if (sizing && history.length >= 1 && history.length <= 3) {
-        setTimeout(() => {
-          if (result.estimated_efficiency > (sizing?.estimated_efficiency || 0)) {
-            toast('eta aumentou! A mudança melhorou o projeto.', 'success')
-          } else if (sizing && result.estimated_efficiency < sizing.estimated_efficiency) {
-            toast('eta diminuiu. Tente ajustar outros parâmetros.', 'info')
-          }
-        }, 3500)
-      }
-
-      // Encouragement (#9)
-      setTimeout(() => {
-        const eta = result.estimated_efficiency
-        const msgs_excellent = ['Excelente projeto!', 'Top 10% para este Nq!', 'Projeto de referência!']
-        const msgs_good = ['Bom projeto!', 'Parâmetros bem equilibrados.', 'Design sólido.']
-        const msgs_ok = ['Aceitável. Pequenos ajustes podem melhorar.', 'Bom ponto de partida para otimização.']
-        const msgs_bad = ['Não desanime! Ajuste os parâmetros.', 'Tente variar RPM ou número de pás.']
-        const pick = (arr: string[]) => arr[Math.floor(Math.random() * arr.length)]
-        if (eta > 0.85) toast(pick(msgs_excellent), 'success')
-        else if (eta > 0.78) toast(pick(msgs_good), 'success')
-        else if (eta > 0.70) toast(pick(msgs_ok), 'info')
-        else toast(pick(msgs_bad), 'info')
-      }, 4500)
+      }, 1500)
     } catch {
       toast('Erro ao calcular', 'error')
     } finally {
@@ -816,9 +783,6 @@ export default function App() {
 
   const canRun = opPoint.flowRate > 0 && opPoint.head > 0 && opPoint.rpm > 0
 
-  // Tabs that need full width (no 2-column layout with SizingForm)
-  const WIDE_TABS: Tab[] = ['3d', 'meridional-drag', 'meridional-editor', 'lete', 'lean-sweep', 'doe', 'pareto', 'batch', 'templates', 'compare', 'optimize', 'pipeline', 'cavitation', 'cfd_sim', 'benchmarks']
-
   // === DESIGN — 3D viewer (now with sub-tabs visible) ===
   if (tab === '3d') {
     return (
@@ -973,20 +937,12 @@ export default function App() {
                   }}
                 />
               ) : (
-                <div style={{
-                  padding: 24, textAlign: 'center',
-                  color: 'var(--text-muted)', fontSize: 13,
-                  border: '1px dashed var(--border-primary)', borderRadius: 8,
-                }}>
-                  Preencha o ponto de operação (Q, H, n) antes de executar o pipeline.
-                </div>
+                <EmptyStateHint label="Preencha Q, H e n no formulário para executar o pipeline." />
               )}
             </div>
           )}
           {!sizing && tab !== 'templates' && tab !== 'pipeline' && tab !== 'cavitation' && tab !== 'cfd_sim' && (
-            <div style={{ padding: 40, textAlign: 'center', color: 'var(--text-muted)' }}>
-              Execute um dimensionamento primeiro para usar esta funcionalidade.
-            </div>
+            <EmptyStateHint label="Execute um dimensionamento primeiro para usar esta funcionalidade." />
           )}
         </div>
         <StatusBar sizing={sizing} previousSizing={previousSizing} opPoint={sizing ? opPoint : undefined} savedId={savedId} onShortcutsHelp={() => setShortcutsHelpOpen(true)} onTimeline={() => setTimelineOpen(v => !v)} />
@@ -1108,15 +1064,6 @@ export default function App() {
           </button>
         </div>
       </div>
-
-      {/* #20 — new version banner */}
-      {newVersionBanner && (
-        <div style={{ position: 'fixed', top: 0, left: 0, right: 0, zIndex: 9999, background: 'var(--accent)', color: '#fff', padding: '7px 20px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 12, fontSize: 12, fontWeight: 500 }}>
-          <span>Nova versão {CURRENT_VERSION} disponível — atualize a página para aplicar as melhorias</span>
-          <button onClick={() => window.location.reload()} style={{ background: 'rgba(255,255,255,0.25)', border: 'none', color: '#fff', borderRadius: 4, padding: '3px 12px', cursor: 'pointer', fontSize: 12, fontWeight: 700, fontFamily: 'var(--font-family)' }}>Recarregar</button>
-          <button onClick={() => setNewVersionBanner(false)} style={{ background: 'none', border: 'none', color: '#fff', cursor: 'pointer', fontSize: 18, padding: '0 4px', marginLeft: 4, lineHeight: 1 }}>×</button>
-        </div>
-      )}
 
       {/* Two-column design layout: left = form + export, right = results + analysis tabs */}
       <div style={{ display: 'grid', gridTemplateColumns: sidebarCollapsed ? '0 1fr' : '320px 1fr', gap: sidebarCollapsed ? 0 : 24, transition: 'grid-template-columns 0.25s ease' }}>
