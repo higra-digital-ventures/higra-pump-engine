@@ -46,6 +46,11 @@ class DesignConstraints:
     nq_max: Optional[float] = 250.0             # specific speed upper bound
     max_sigma: Optional[float] = None           # Thoma cavitation index [-]
 
+    # Manufacturing constraints (evaluated against the geometry stage when set).
+    # Relevant mainly for the FREE mode (additive manufacturing).
+    min_wall_thickness_mm: Optional[float] = None   # printability / casting limit
+    max_build_volume_cm3: Optional[float] = None    # AM build envelope
+
     def to_dict(self) -> dict:
         return asdict(self)
 
@@ -220,6 +225,16 @@ class DesignState:
                 if c.nq_max is not None:
                     checks.append(_check_max("nq_max", nq, c.nq_max, "Nq"))
 
+        # Manufacturing checks (evaluated from the geometry stage when present).
+        g = self.geometry or {}
+        if g:
+            wall = _geometry_wall_thickness_mm(g)
+            volume = _geometry_volume_cm3(g)
+            if c.min_wall_thickness_mm is not None and wall is not None:
+                checks.append(_check_min("min_wall_thickness", wall, c.min_wall_thickness_mm, "parede [mm]"))
+            if c.max_build_volume_cm3 is not None and volume is not None:
+                checks.append(_check_max("max_build_volume", volume, c.max_build_volume_cm3, "volume [cm³]"))
+
         feasible = not errors and all(chk.ok for chk in checks)
         return ConstraintReport(feasible=feasible, checks=checks, errors=errors, warnings=warnings)
 
@@ -318,6 +333,21 @@ def _num(v: Any) -> Optional[float]:
         return float(v)
     except (TypeError, ValueError):
         return None
+
+
+def _geometry_wall_thickness_mm(geometry: dict) -> Optional[float]:
+    """Min wall/blade thickness [mm] from a geometry artifact (classic or free)."""
+    params = geometry.get("params") or {}
+    for key in ("blade_thickness_mm", "min_wall_thickness_mm", "wall_thickness_mm"):
+        if params.get(key) is not None:
+            return _num(params[key])
+    return None
+
+
+def _geometry_volume_cm3(geometry: dict) -> Optional[float]:
+    """Solid volume [cm³] from a geometry artifact (implicit backend reports it)."""
+    vox = (geometry.get("extra") or {}).get("voxel") or {}
+    return _num(vox.get("solid_volume_cm3"))
 
 
 def _to_op_dict(op: Any) -> dict:

@@ -58,6 +58,7 @@ def build_impeller_sdf(sizing: Any) -> tuple[S.SDF, dict, Bounds]:
         "R_eye_mm": round(r_eye * 1000, 1),
         "disk_thickness_mm": round(disk_t * 1000, 1),
         "blade_height_mm": round(blade_h * 1000, 1),
+        "blade_thickness_mm": round(t_blade * 1000, 2),
         "blade_count": z_blades,
         "total_height_mm": round(total_h * 1000, 1),
     }

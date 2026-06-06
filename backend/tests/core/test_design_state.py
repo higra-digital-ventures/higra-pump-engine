@@ -156,6 +156,35 @@ def test_stages_constant_order():
     assert STAGES == ("sizing", "geometry", "physics", "surrogate", "cfd")
 
 
+def test_am_min_wall_thickness_fails():
+    st = DesignState.from_operating_point(
+        _op(), constraints=DesignConstraints(min_wall_thickness_mm=3.0),
+    )
+    st.record_stage("sizing", _good_sizing())
+    st.record_stage("geometry", {"params": {"blade_thickness_mm": 2.0}})  # < 3.0
+    failed = [c.name for c in st.evaluate_constraints().failed]
+    assert "min_wall_thickness" in failed
+
+
+def test_am_build_volume_fails():
+    st = DesignState.from_operating_point(
+        _op(), constraints=DesignConstraints(max_build_volume_cm3=1000.0),
+    )
+    st.record_stage("sizing", _good_sizing())
+    st.record_stage("geometry", {"extra": {"voxel": {"solid_volume_cm3": 5000.0}}})
+    failed = [c.name for c in st.evaluate_constraints().failed]
+    assert "max_build_volume" in failed
+
+
+def test_am_checks_skipped_without_geometry():
+    st = DesignState.from_operating_point(
+        _op(), constraints=DesignConstraints(min_wall_thickness_mm=3.0, max_build_volume_cm3=10.0),
+    )
+    st.record_stage("sizing", _good_sizing())
+    names = [c.name for c in st.evaluate_constraints().checks]
+    assert "min_wall_thickness" not in names and "max_build_volume" not in names
+
+
 def test_mode_defaults_classic_and_roundtrips():
     from hpe.core.enums import DesignMode
     st = DesignState.from_operating_point(_op())
