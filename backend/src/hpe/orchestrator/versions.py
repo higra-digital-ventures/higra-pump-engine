@@ -228,27 +228,22 @@ def _try_save_to_db(version: DesignVersion, db_url: Optional[str], saved: list[s
         log.debug("save_version: DATABASE_URL not set — skipping DB persistence")
         return
 
-    try:
-        from hpe.db.training_log import insert_from_sizing  # type: ignore[import]
+    # NOTE: previously this imported ``hpe.db.training_log`` (a module that
+    # does not exist) with a mismatched signature, so it silently failed on
+    # every save. It now uses the central ingestion layer, which maps the
+    # version to a TrainingLogEntry and inserts gracefully.
+    from hpe.data.ingest import log_sizing_run
 
-        op = version.operating_point
-        sr = version.sizing_result
-        sp = version.surrogate_prediction or {}
-
-        insert_from_sizing(
-            op_dict=op,
-            sizing_dict=sr,
-            surrogate_dict=sp,
-            notes=version.notes,
-            tags=version.tags,
-            version_id=version.id,
-            project_id=version.project_id,
-        )
+    row_id = log_sizing_run(
+        op=version.operating_point,
+        sizing=version.sizing_result,
+        projeto_id=version.project_id,
+        notas=version.notes,
+    )
+    if row_id:
         saved.append("postgresql:training_log")
-    except ImportError:
-        log.debug("save_version: hpe.db.training_log not available — skipping DB")
-    except Exception as exc:
-        log.warning("save_version: DB insert failed (%s) — falling back to JSON", exc)
+    else:
+        log.debug("save_version: training_log insert skipped (DB unavailable)")
 
 
 def _try_save_to_json(version: DesignVersion, file_path: str, saved: list[str]) -> None:
