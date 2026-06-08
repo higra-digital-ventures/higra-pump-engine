@@ -22,7 +22,7 @@ export type Tab =
   | 'multispeed' | 'meridional-editor' | 'spanwise'
   | 'templates' | 'doe' | 'pareto' | 'lean-sweep' | 'lete'
   | 'meridional-drag' | 'noise' | 'batch' | 'pipeline'
-  | 'cavitation' | 'cfd_sim' | 'benchmarks'
+  | 'cavitation' | 'cfd_sim' | 'benchmarks' | 'geometry-modes'
 
 export interface SubTab { key: Tab; label: string }
 
@@ -39,6 +39,7 @@ export const SUB_TABS: Record<Section, SubTab[]> = {
   ],
   geometry: [
     { key: '3d', label: 'Rotor 3D' },
+    { key: 'geometry-modes', label: 'Modo (Clássico/Livre)' },
     { key: 'meridional-drag', label: 'Editor Meridional' },
     { key: 'meridional-editor', label: 'Meridional Avançado' },
     { key: 'lete', label: 'LE / TE' },
@@ -70,7 +71,7 @@ export const SUB_TABS: Record<Section, SubTab[]> = {
 export const WIDE_TABS: Tab[] = [
   '3d', 'meridional-drag', 'meridional-editor', 'lete', 'lean-sweep',
   'doe', 'pareto', 'batch', 'templates', 'compare', 'optimize',
-  'pipeline', 'cavitation', 'cfd_sim', 'benchmarks',
+  'pipeline', 'cavitation', 'cfd_sim', 'benchmarks', 'geometry-modes',
 ]
 
 export function isWideTab(tab: Tab): boolean {
