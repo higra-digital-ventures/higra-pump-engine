@@ -13,6 +13,7 @@ from hpe.sizing import run_sizing
 class TestCFDPipeline:
     def test_generates_case_without_solver(self) -> None:
         """Pipeline should generate case even without OpenFOAM."""
+        pytest.importorskip("cadquery", reason="geometry export step requires CadQuery")
         op = OperatingPoint(flow_rate=0.05, head=30.0, rpm=1750)
         sizing = run_sizing(op)
 

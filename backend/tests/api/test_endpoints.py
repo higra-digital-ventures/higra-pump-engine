@@ -74,6 +74,7 @@ class TestOptimizeEndpoint:
         assert data["n_evaluations"] > 0
 
     def test_optimize_bayesian(self) -> None:
+        pytest.importorskip("optuna", reason="Bayesian optimize endpoint requires Optuna")
         response = client.post("/api/v1/optimize", json={
             "flow_rate": 0.05, "head": 30.0, "rpm": 1750,
             "method": "bayesian", "n_gen": 10, "seed": 42,

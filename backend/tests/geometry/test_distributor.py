@@ -5,6 +5,8 @@ from pathlib import Path
 
 import pytest
 
+pytest.importorskip("cadquery", reason="distributor guide-vane generation requires CadQuery")
+
 from hpe.core.enums import GeometryFormat
 from hpe.core.models import OperatingPoint, SizingResult
 from hpe.geometry.distributor.guide_vanes import (

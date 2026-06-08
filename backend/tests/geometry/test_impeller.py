@@ -5,6 +5,8 @@ from pathlib import Path
 
 import pytest
 
+pytest.importorskip("cadquery", reason="3D impeller generation requires CadQuery")
+
 from hpe.core.enums import GeometryFormat
 from hpe.core.models import OperatingPoint, SizingResult
 from hpe.geometry.models import RunnerGeometryParams
