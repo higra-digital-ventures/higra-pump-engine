@@ -241,7 +241,6 @@ class SurrogateEvaluator:
     def predict_batch(self, inputs: list[SurrogateInput]) -> list[SurrogateOutput]:
         """Batch prediction for multiple operating points."""
         self._ensure_loaded()
-        from hpe.ai.surrogate.v1_xgboost import SurrogateInput as V1Input
         v1_inputs = [inp.to_v1_input() for inp in inputs]
         v1_outputs = self._model.predict_batch(v1_inputs)
         return [

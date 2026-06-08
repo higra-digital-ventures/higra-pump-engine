@@ -461,7 +461,6 @@ def run_optimization_task(
         )
 
     try:
-        from hpe.core.models import OperatingPoint
         from hpe.optimization.problem import OptimizationProblem  # type: ignore[import]
 
         op = _op_from_dict(op_dict)

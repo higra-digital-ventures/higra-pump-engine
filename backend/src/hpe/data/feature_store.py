@@ -194,7 +194,6 @@ class FeatureStore:
         pd.DataFrame
             Exported rows.
         """
-        import psycopg2
         from psycopg2.extras import RealDictCursor
         from hpe.data.training_log import _connect
 

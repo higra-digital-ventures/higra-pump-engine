@@ -7,12 +7,12 @@ efficiency, cavitation, and robustness.
 from __future__ import annotations
 
 import random
-from dataclasses import dataclass, field
+from dataclasses import dataclass
 from typing import Any
 
 from deap import algorithms, base, creator, tools
 
-from hpe.optimization.evaluator import EvaluationResult, evaluate_design
+from hpe.optimization.evaluator import evaluate_design
 from hpe.optimization.problem import OptimizationProblem
 
 

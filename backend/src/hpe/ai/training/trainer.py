@@ -14,7 +14,6 @@ import numpy as np
 from hpe.ai.surrogate.dataset import SurrogateDataset, generate_dataset
 from hpe.ai.surrogate.model import SurrogateMetrics, SurrogateModel
 from hpe.ai.surrogate.predictor import SurrogatePredictor
-from hpe.optimization.problem import OptimizationProblem
 
 
 @dataclass

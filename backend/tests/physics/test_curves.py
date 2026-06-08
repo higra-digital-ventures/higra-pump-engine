@@ -1,6 +1,5 @@
 """Tests for performance curve generation."""
 
-import pytest
 
 from hpe.core.models import SizingResult
 from hpe.physics.curves import (

@@ -12,7 +12,6 @@ from __future__ import annotations
 
 import math
 import tempfile
-from pathlib import Path
 from typing import List, Optional
 
 from fastapi import APIRouter, HTTPException
@@ -462,7 +461,6 @@ def get_impeller_geometry(req: GeometryRequest) -> ImpellerGeometry:
     """Generate 3D blade surfaces with advanced geometry parameters."""
     from hpe.core.models import OperatingPoint
     from hpe.sizing.meanline import run_sizing
-    from hpe.constants import BLADE_THICKNESS_RATIO
 
     op = OperatingPoint(flow_rate=req.flow_rate, head=req.head, rpm=req.rpm)
     sizing = run_sizing(op)

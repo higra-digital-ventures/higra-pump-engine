@@ -1,6 +1,5 @@
 """Integration tests for the meanline sizing orchestrator."""
 
-import pytest
 
 from hpe.core.enums import MachineType
 from hpe.core.models import OperatingPoint

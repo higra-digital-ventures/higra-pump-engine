@@ -1,6 +1,5 @@
 """Tests for stability analysis."""
 
-import pytest
 
 from hpe.core.models import SizingResult
 from hpe.physics.curves import generate_curves

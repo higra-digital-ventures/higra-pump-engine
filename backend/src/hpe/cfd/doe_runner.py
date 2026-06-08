@@ -20,7 +20,10 @@ import uuid
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from dataclasses import dataclass, field
 from pathlib import Path
-from typing import Optional
+from typing import Optional, TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from hpe.core.models import SizingResult
 
 log = logging.getLogger(__name__)
 

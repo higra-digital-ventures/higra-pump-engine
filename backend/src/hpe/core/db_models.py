@@ -22,7 +22,6 @@ from datetime import datetime
 from sqlalchemy import (
     Column,
     DateTime,
-    Enum,
     Float,
     ForeignKey,
     Integer,

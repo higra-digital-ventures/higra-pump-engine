@@ -10,7 +10,7 @@ from __future__ import annotations
 import math
 from dataclasses import dataclass, field
 
-from hpe.core.models import G, PerformanceMetrics, SizingResult
+from hpe.core.models import PerformanceMetrics, SizingResult
 from hpe.physics.euler import get_design_flow_rate
 from hpe.physics.performance import evaluate_performance
 from hpe.sizing.velocity_triangles import (
@@ -18,7 +18,6 @@ from hpe.sizing.velocity_triangles import (
     calc_blockage_factor,
 )
 from hpe.sizing.efficiency import estimate_all_efficiencies
-from hpe.sizing.cavitation import calc_npsh_required
 from hpe.sizing.specific_speed import calc_specific_speed
 
 

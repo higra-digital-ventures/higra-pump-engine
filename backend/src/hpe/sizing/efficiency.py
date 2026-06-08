@@ -12,7 +12,6 @@ References:
 
 from __future__ import annotations
 
-import math
 
 
 def estimate_hydraulic_efficiency(flow_rate: float, nq: float) -> float:

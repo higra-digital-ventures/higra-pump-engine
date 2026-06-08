@@ -1,6 +1,5 @@
 """Tests for meridional channel generation."""
 
-import math
 
 import pytest
 

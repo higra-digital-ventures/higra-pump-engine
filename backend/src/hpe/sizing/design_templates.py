@@ -6,7 +6,7 @@ centrifugal pumps, turbines, fans, compressors and pump-turbines.
 
 from __future__ import annotations
 
-from typing import Any, Dict, List, Optional
+from typing import Any, Dict, List
 
 from hpe.core.enums import MachineType
 from hpe.core.models import OperatingPoint

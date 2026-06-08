@@ -1,6 +1,5 @@
 """Tests for Francis turbine sizing."""
 
-import pytest
 
 from hpe.sizing.francis import FrancisSizing, size_francis
 

@@ -20,7 +20,7 @@ from __future__ import annotations
 import math
 from dataclasses import dataclass
 
-from hpe.core.models import G, OperatingPoint, SizingResult
+from hpe.core.models import G, OperatingPoint
 from hpe.sizing.efficiency import estimate_all_efficiencies
 from hpe.sizing.specific_speed import calc_specific_speed
 

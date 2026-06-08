@@ -9,7 +9,6 @@ PTD format:
     Sections are separated by ### SECTION NAME ### headers.
 """
 from __future__ import annotations
-import re
 from pathlib import Path
 from typing import Any
 

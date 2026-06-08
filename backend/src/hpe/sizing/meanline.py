@@ -14,7 +14,6 @@ import copy
 import logging
 import math
 import time
-from functools import lru_cache
 
 from hpe.constants import (
     G, U2_EROSION_LIMIT, W_RATIO_LIMIT, BETA2_LOW_LIMIT, NPSH_HIGH_LIMIT,
@@ -222,7 +221,6 @@ def run_sizing(op: OperatingPoint) -> SizingResult:
 
     # Compressibility correction: adjust head for density variation
     if _is_compressible and op.fluid_props is not None:
-        from hpe.physics.compressible import stagnation_temperature, stagnation_pressure
         # Note: for a full compressible analysis the dedicated radial_turbine
         # or compressor modules should be used.  Here we apply a first-order
         # density correction so that the incompressible correlations remain

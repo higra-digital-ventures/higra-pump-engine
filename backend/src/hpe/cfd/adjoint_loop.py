@@ -259,7 +259,6 @@ def _run_adjoint_iter(
     prev_iter_dir: Optional[Path] = None,
 ) -> AdjointIterResult:
     """Executar uma iteração: build case → SU2 direct → SU2 adjoint → extract sens."""
-    from hpe.cfd.su2.config import write_su2_config
     from hpe.cfd.su2.runner import run_su2_direct, run_su2_adjoint, su2_available
     from hpe.cfd.su2.sensitivity import extract_sensitivities
 

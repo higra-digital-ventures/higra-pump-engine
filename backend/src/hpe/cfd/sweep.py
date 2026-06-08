@@ -20,7 +20,6 @@ Usage
 from __future__ import annotations
 
 import logging
-import math
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from dataclasses import dataclass, field
 from pathlib import Path
@@ -291,7 +290,6 @@ def _run_single_point(
 
     try:
         from hpe.cfd.pipeline import run_cfd_pipeline
-        from hpe.sizing.meanline import run_sizing
 
         # Criar OperatingPoint modificado
         op = OperatingPoint(

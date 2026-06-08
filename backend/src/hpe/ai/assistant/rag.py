@@ -25,14 +25,13 @@ from __future__ import annotations
 
 import logging
 import os
-from dataclasses import dataclass, field
+from dataclasses import dataclass
 from typing import Optional
 
 from hpe.ai.assistant.offline_rules import (
     analyze_cavitation_risk,
     diagnose_low_efficiency,
     suggest_geometry_improvements,
-    analyze_velocity_triangles,
 )
 
 log = logging.getLogger(__name__)

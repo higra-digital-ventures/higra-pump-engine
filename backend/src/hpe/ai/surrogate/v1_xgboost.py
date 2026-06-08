@@ -31,12 +31,9 @@ Usage
 
 from __future__ import annotations
 
-import json
 import logging
-import os
 import time
-import warnings
-from dataclasses import asdict, dataclass, field
+from dataclasses import dataclass
 from pathlib import Path
 from typing import Any
 
@@ -563,7 +560,7 @@ if __name__ == "__main__":
     # Quick smoke test
     test_input = SurrogateInput(ns=35.0, d2_mm=320.0, q_m3h=200.0, h_m=45.0, n_rpm=1750)
     pred = model.predict(test_input)
-    print(f"\n--- Smoke Test (Ns=35, D2=320mm, Q=200m³/h, H=45m) ---")
+    print("\n--- Smoke Test (Ns=35, D2=320mm, Q=200m³/h, H=45m) ---")
     print(f"  η_total = {pred.eta_total:.1f}%")
     print(f"  η_hid   = {pred.eta_hid:.1f}%")
     print(f"  P_shaft = {pred.p_kw:.1f} kW")

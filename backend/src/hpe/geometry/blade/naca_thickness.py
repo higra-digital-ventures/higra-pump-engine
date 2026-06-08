@@ -15,7 +15,7 @@ from __future__ import annotations
 from dataclasses import dataclass
 from enum import Enum
 import math
-from typing import Any, Dict, List, Optional
+from typing import Any
 
 
 class ThicknessType(str, Enum):

@@ -9,7 +9,6 @@ from __future__ import annotations
 from hpe.core.db_models import (
     OperatingPointRecord,
     PerformanceDataPoint,
-    Project,
     SizingResultRecord,
 )
 from hpe.core.models import OperatingPoint, PerformanceMetrics, SizingResult

@@ -6,7 +6,6 @@ import logging
 import math
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Optional
 
 log = logging.getLogger(__name__)
 

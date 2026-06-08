@@ -17,7 +17,7 @@ from __future__ import annotations
 
 import datetime
 from dataclasses import dataclass, field
-from typing import List, Tuple
+from typing import Tuple
 
 import numpy as np
 
@@ -212,7 +212,7 @@ def write_iges(
                     params.append(f"{x:.6f},{y:.6f},{z:.6f},")
 
             # Parameter space bounds
-            params.append(f"0.000000,1.000000,0.000000,1.000000;")
+            params.append("0.000000,1.000000,0.000000,1.000000;")
 
             entity.parameter_lines = params
             entities.append(entity)
@@ -253,7 +253,7 @@ def write_iges(
             params.append(f"{x:.6f},{y:.6f},{z:.6f},")
 
         # Parameter bounds
-        params.append(f"0.000000,1.000000,0.000000,0.000000,0.000000;")
+        params.append("0.000000,1.000000,0.000000,0.000000,0.000000;")
 
         entity.parameter_lines = params
         entities.append(entity)

@@ -11,13 +11,11 @@ References:
 
 from __future__ import annotations
 
-import math
 import uuid
-from dataclasses import dataclass, field
+from dataclasses import dataclass
 from pathlib import Path
-from typing import Any, Callable, Optional
+from typing import Any, Optional
 
-import numpy as np
 
 from hpe.cfd.openfoam.case_builder import build_case
 from hpe.cfd.openfoam.runner import run_case, RunResult

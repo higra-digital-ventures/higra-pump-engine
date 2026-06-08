@@ -7,7 +7,6 @@ to PyTorch neural networks when more data is available.
 from __future__ import annotations
 
 from dataclasses import dataclass
-from typing import Any, Optional
 
 import numpy as np
 from sklearn.ensemble import RandomForestRegressor

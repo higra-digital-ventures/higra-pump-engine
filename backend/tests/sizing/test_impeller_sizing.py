@@ -1,6 +1,5 @@
 """Tests for impeller sizing calculations."""
 
-import pytest
 
 from hpe.sizing.impeller_sizing import (
     calc_blade_count,

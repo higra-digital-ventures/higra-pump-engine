@@ -52,7 +52,6 @@ def lean_sweep_analysis(req: LeanSweepRequest) -> LeanSweepResponse:
     """Compute lean, sweep and bow metrics for the impeller blade stacking."""
     from hpe.core.models import OperatingPoint
     from hpe.sizing.meanline import run_sizing
-    from hpe.constants import BLADE_THICKNESS_RATIO
 
     op = OperatingPoint(flow_rate=req.flow_rate, head=req.head, rpm=req.rpm)
     sizing = run_sizing(op)

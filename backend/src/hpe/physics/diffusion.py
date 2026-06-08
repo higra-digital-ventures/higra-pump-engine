@@ -1,7 +1,6 @@
 """Lieblein diffusion ratio and de Haller criterion for blade passages."""
 
 from __future__ import annotations
-import math
 
 
 def calc_diffusion_ratio(w1: float, w2: float) -> float:

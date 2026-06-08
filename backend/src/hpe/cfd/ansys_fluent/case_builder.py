@@ -12,7 +12,6 @@ from __future__ import annotations
 
 import math
 import textwrap
-from typing import Any
 
 from hpe.core.models import SizingResult
 

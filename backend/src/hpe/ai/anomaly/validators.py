@@ -6,7 +6,6 @@ the ML pipeline. These are deterministic (not statistical).
 
 from __future__ import annotations
 
-import math
 from dataclasses import dataclass
 
 from hpe.core.models import PerformanceMetrics, SizingResult

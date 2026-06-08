@@ -73,9 +73,9 @@ def analyze_cavitation_risk(npsh_r: float, npsh_a: float) -> dict:
             "Risco de cavitação em transientes ou variações de temperatura."
         )
         actions.extend([
-            f"Aumentar NPSHa: elevar nível do reservatório de sucção ou reduzir perdas na tubulação de sucção.",
-            f"Verificar temperatura do fluido — vapor de água reduz NPSHa.",
-            f"Considerar impelidor com NPSHr menor (maior olho de sucção).",
+            "Aumentar NPSHa: elevar nível do reservatório de sucção ou reduzir perdas na tubulação de sucção.",
+            "Verificar temperatura do fluido — vapor de água reduz NPSHa.",
+            "Considerar impelidor com NPSHr menor (maior olho de sucção).",
         ])
         references.append("Gülich §8.2.4 — Medidas para aumentar NPSHa")
 
@@ -470,7 +470,7 @@ def explain_bias(bias_pp: float, pump_type: str = "radial") -> str:
         f"Recomendação: {action}",
         "",
         "Referência: Gülich §3.10.6 — Incerteza das correlações de eficiência.",
-        f"Nota HPE: Validação M1.8 (435 pontos) mostrou bias médio de +7.65pp — esperado para design ótimo vs rotor trimado.",
+        "Nota HPE: Validação M1.8 (435 pontos) mostrou bias médio de +7.65pp — esperado para design ótimo vs rotor trimado.",
     ])
 
     return "\n".join(lines)

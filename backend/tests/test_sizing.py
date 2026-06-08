@@ -1,5 +1,4 @@
 """Tests for 1D meanline sizing."""
-import pytest
 from hpe.core.models import OperatingPoint
 from hpe.sizing.meanline import run_sizing
 

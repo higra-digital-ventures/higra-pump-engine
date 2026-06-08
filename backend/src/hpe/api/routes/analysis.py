@@ -2,13 +2,11 @@
 
 from __future__ import annotations
 
-import math
 
 from fastapi import APIRouter
 from pydantic import BaseModel, Field
-from typing import Any, Dict, List, Optional
+from typing import List
 
-from hpe.core.enums import MachineType
 from hpe.core.models import OperatingPoint
 
 router = APIRouter(prefix="/api/v1", tags=["analysis"])

@@ -5,7 +5,6 @@
     GET  /api/v1/design/cordier?nq=<nq>            — Cordier diagram point (sigma vs phi)
 """
 from __future__ import annotations
-import math
 from fastapi import APIRouter
 from pydantic import BaseModel, Field
 from typing import Optional

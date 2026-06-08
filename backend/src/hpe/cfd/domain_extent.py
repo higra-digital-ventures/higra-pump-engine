@@ -8,7 +8,7 @@ to avoid mesh distortion and improve CFD convergence.
 from __future__ import annotations
 
 import math
-from dataclasses import dataclass, field
+from dataclasses import dataclass
 from typing import Literal
 
 import numpy as np

@@ -4,7 +4,7 @@ import pytest
 
 from hpe.ai.assistant.interpreter import interpret_performance, interpret_sizing
 from hpe.ai.assistant.recommender import Recommendation, recommend_improvements
-from hpe.core.models import OperatingPoint, PerformanceMetrics
+from hpe.core.models import OperatingPoint
 from hpe.physics.euler import get_design_flow_rate
 from hpe.physics.performance import evaluate_performance
 from hpe.sizing import run_sizing

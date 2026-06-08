@@ -7,7 +7,6 @@ import math
 import pytest
 
 from hpe.geometry.runner.stacking import (
-    StackingResult,
     StackingSpec,
     StackingType,
     apply_stacking_to_sections,

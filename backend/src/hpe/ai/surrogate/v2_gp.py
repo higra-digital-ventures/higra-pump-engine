@@ -40,7 +40,7 @@ from __future__ import annotations
 import logging
 import time
 import warnings as _warnings
-from dataclasses import dataclass, field
+from dataclasses import dataclass
 from pathlib import Path
 from typing import Any
 
@@ -621,7 +621,7 @@ if __name__ == "__main__":
     # Smoke test with uncertainty
     test_input = SurrogateInput(ns=35.0, d2_mm=320.0, q_m3h=200.0, h_m=45.0, n_rpm=1750)
     pred, sigma = model.predict_with_uncertainty(test_input)
-    print(f"\n--- Smoke Test (Ns=35, D2=320mm) ---")
+    print("\n--- Smoke Test (Ns=35, D2=320mm) ---")
     print(f"  η_total = {pred.eta_total:.1f}% ± {pred.eta_total_std:.2f}%")
     print(f"  η_hid   = {pred.eta_hid:.1f}% ± {pred.eta_hid_std:.2f}%")
     print(f"  P_shaft = {pred.p_kw:.1f} kW  (σ = {sigma:.2f}% mean)")

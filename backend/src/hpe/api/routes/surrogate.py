@@ -132,7 +132,6 @@ def predict_surrogate(req: PredictRequest) -> PredictResponse:
         from hpe.sizing import run_sizing
         try:
             # Rough Q estimate from Nq = n·√Q / H^0.75
-            import math
             q_approx = (req.nq * (req.rpm ** -1) * req.head ** 0.75) ** 2
             r = run_sizing(OperatingPoint(
                 flow_rate=max(1e-4, q_approx),
