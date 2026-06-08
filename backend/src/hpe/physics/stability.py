@@ -10,13 +10,11 @@ Analyzes performance curves to identify:
 
 from __future__ import annotations
 
-import math
 from dataclasses import dataclass, field
 
 from hpe.core.models import SizingResult
 from hpe.physics.curves import PerformanceCurves, generate_curves
 from hpe.physics.euler import get_design_flow_rate
-from hpe.physics.performance import evaluate_performance
 
 
 @dataclass

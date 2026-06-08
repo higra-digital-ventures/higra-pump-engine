@@ -1,6 +1,5 @@
 """Tests for specific speed calculations."""
 
-import math
 
 import pytest
 

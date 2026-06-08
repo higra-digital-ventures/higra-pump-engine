@@ -24,7 +24,7 @@ Usage
 from __future__ import annotations
 
 import logging
-from dataclasses import dataclass, field
+from dataclasses import dataclass
 from pathlib import Path
 from typing import Optional
 
@@ -75,7 +75,6 @@ class ZGBConfig:
     @classmethod
     def water_at(cls, temp_c: float) -> "ZGBConfig":
         """Criar config para água à temperatura especificada (Antoine)."""
-        import math
         # Antoine equation — água
         A, B, C = 8.07131, 1730.63, 233.426
         p_sat_mmHg = 10 ** (A - B / (C + temp_c))

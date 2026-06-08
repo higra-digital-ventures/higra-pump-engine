@@ -6,7 +6,7 @@ import math
 
 import pytest
 
-from hpe.core.models import G, OperatingPoint, VelocityTriangle
+from hpe.core.models import OperatingPoint
 from hpe.physics.advanced_losses import (
     AdvancedLossBreakdown,
     calc_advanced_losses,

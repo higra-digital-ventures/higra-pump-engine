@@ -101,7 +101,7 @@ def interpret_performance(
         lines.append("Impeller may need upsizing or speed increase.")
 
     # Efficiency breakdown
-    lines.append(f"\nEfficiency breakdown:")
+    lines.append("\nEfficiency breakdown:")
     lines.append(f"  Hydraulic: {perf.hydraulic_efficiency:.1%} (flow losses in impeller)")
     lines.append(f"  Volumetric: {perf.volumetric_efficiency:.1%} (leakage through clearances)")
     lines.append(f"  Mechanical: {perf.mechanical_efficiency:.1%} (disk friction + bearings)")

@@ -29,9 +29,7 @@ Usage
 from __future__ import annotations
 
 import logging
-import math
 from pathlib import Path
-from typing import Optional
 
 log = logging.getLogger(__name__)
 

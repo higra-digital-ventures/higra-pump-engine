@@ -12,7 +12,7 @@ from __future__ import annotations
 
 import math
 import textwrap
-from dataclasses import dataclass, field
+from dataclasses import dataclass
 from typing import Any
 
 from hpe.core.models import SizingResult

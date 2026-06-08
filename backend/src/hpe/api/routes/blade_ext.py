@@ -8,16 +8,13 @@ Endpoints:
 """
 from __future__ import annotations
 from typing import Literal, Optional
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter
 from pydantic import BaseModel, Field
 
 from hpe.geometry.runner.splitter import size_splitter
 from hpe.geometry.blade.naca_thickness import (
     ThicknessType,
     get_thickness,
-    naca_thickness,
-    ellipse_thickness,
-    spanwise_thickness_variation,
 )
 from hpe.geometry.blade.stacking import StackingConfig, compute_stacking, wrap_angle_from_geometry
 

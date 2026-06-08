@@ -1,6 +1,5 @@
 """Tests for mesh generators."""
 
-import pytest
 
 from hpe.cfd.mesh.blockmesh import generate_blockmesh_dict
 from hpe.cfd.mesh.snappy import generate_snappy_dict

@@ -10,7 +10,7 @@ from __future__ import annotations
 import math
 import threading
 from dataclasses import dataclass
-from typing import Any, Callable, Dict, List, Optional
+from typing import Callable, Dict, List, Optional
 
 from hpe.core.models import OperatingPoint, SizingResult
 

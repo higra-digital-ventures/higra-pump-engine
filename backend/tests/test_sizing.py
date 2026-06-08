@@ -1,5 +1,4 @@
 """Tests for 1D meanline sizing."""
-import pytest
 from hpe.core.models import OperatingPoint
 from hpe.sizing.meanline import run_sizing
 
@@ -15,12 +14,6 @@ class TestSizing:
         assert r.estimated_npsh_r > 0
         assert r.estimated_power > 0
 
-    @pytest.mark.xfail(
-        reason="Decisao de engenharia pendente: a Nq~97 o sizing retorna "
-        "blade_count=10, mas o teste espera <=6 ('menos pas em Nq alto'). "
-        "Revisar a correlacao de numero de pas vs a expectativa do teste.",
-        strict=False,
-    )
     def test_high_nq_pump(self):
         """High flow pump: Q=1000m3/h, H=20m, n=1750rpm"""
         op = OperatingPoint(flow_rate=1000/3600, head=20, rpm=1750)

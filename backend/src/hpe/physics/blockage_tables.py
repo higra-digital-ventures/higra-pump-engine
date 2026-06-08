@@ -20,8 +20,8 @@ Supports three construction modes:
 from __future__ import annotations
 
 import math
-from dataclasses import dataclass, field
-from typing import Any, Dict, List, Optional, Sequence
+from dataclasses import dataclass
+from typing import Any, Dict, Optional, Sequence
 
 import numpy as np
 from numpy.typing import NDArray

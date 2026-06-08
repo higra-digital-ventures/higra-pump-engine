@@ -41,13 +41,16 @@ interface Props {
   height?: number
 }
 
-// Try to load R3F at runtime
+// Try to load R3F at runtime. `require` only exists in CommonJS contexts; in
+// the browser/ESM build it is undefined, so this safely falls back to canvas2d.
 let R3F: any = null
 let Three: any = null
 try {
-  // eslint-disable-next-line @typescript-eslint/no-var-requires
-  R3F = require('@react-three/fiber')
-  Three = require('three')
+  const _require = (globalThis as any).require as undefined | ((m: string) => any)
+  if (_require) {
+    R3F = _require('@react-three/fiber')
+    Three = _require('three')
+  }
 } catch { /* fallback to canvas2d */ }
 
 // ===========================================================================

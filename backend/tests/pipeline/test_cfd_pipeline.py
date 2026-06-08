@@ -1,11 +1,10 @@
 """Tests for CFD pipeline orchestrator."""
 
 import tempfile
-from pathlib import Path
 
 import pytest
 
-from hpe.core.models import OperatingPoint, SizingResult
+from hpe.core.models import OperatingPoint
 from hpe.pipeline.cfd_pipeline import run_cfd_pipeline
 from hpe.sizing import run_sizing
 

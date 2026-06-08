@@ -4,7 +4,6 @@ import math
 
 import pytest
 
-from hpe.core.models import G
 from hpe.sizing.velocity_triangles import (
     calc_euler_head,
     calc_inlet_triangle,

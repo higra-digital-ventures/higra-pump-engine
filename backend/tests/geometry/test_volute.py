@@ -14,7 +14,7 @@ from hpe.geometry.volute.cross_section import (
     rectangular_section,
     trapezoidal_section,
 )
-from hpe.geometry.volute.models import VoluteParams, VoluteSizing
+from hpe.geometry.volute.models import VoluteParams
 from hpe.geometry.volute.sizing import size_volute
 from hpe.geometry.volute.volute_3d import generate_volute, generate_volute_from_sizing
 from hpe.sizing import run_sizing

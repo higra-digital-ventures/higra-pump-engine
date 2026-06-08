@@ -1,5 +1,4 @@
 """Tests for design database (preliminary design correlations)."""
-import pytest
 from hpe.sizing.design_db import get_design_recommendation, list_machine_types, DESIGN_DATABASE
 
 

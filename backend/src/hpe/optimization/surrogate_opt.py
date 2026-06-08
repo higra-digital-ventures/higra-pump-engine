@@ -26,7 +26,6 @@ If Optuna is not available, a random-search fallback is used.
 from __future__ import annotations
 
 import logging
-import math
 import time
 from dataclasses import dataclass, field
 from typing import Any
@@ -34,7 +33,7 @@ from typing import Any
 import numpy as np
 
 from hpe.core.models import OperatingPoint
-from hpe.optimization.evaluator import evaluate_design, EvaluationResult
+from hpe.optimization.evaluator import evaluate_design
 from hpe.optimization.problem import OptimizationProblem
 
 log = logging.getLogger(__name__)

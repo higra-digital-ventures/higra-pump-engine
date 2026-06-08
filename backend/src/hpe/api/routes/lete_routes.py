@@ -7,9 +7,9 @@ including recommended defaults based on specific speed (Nq).
 
 from __future__ import annotations
 
-from typing import List, Literal, Optional
+from typing import List, Literal
 
-from fastapi import APIRouter, HTTPException, Query
+from fastapi import APIRouter, Query
 from pydantic import BaseModel, Field
 
 router = APIRouter(prefix="/api/v1", tags=["blade-lete"])

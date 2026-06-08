@@ -27,10 +27,13 @@ from __future__ import annotations
 
 import logging
 import math
-from dataclasses import dataclass, field
-from typing import Optional
+from dataclasses import dataclass
+from typing import Optional, TYPE_CHECKING
 
 import numpy as np
+
+if TYPE_CHECKING:
+    from hpe.cfd.sweep import SweepResult
 
 log = logging.getLogger(__name__)
 

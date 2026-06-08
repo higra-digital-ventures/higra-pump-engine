@@ -140,7 +140,7 @@ def _post_process(case_dir: Path, sizing: SizingResult) -> Optional[PerformanceM
     """Extract performance from completed simulation."""
     import math
 
-    from hpe.postprocess.openfoam_parser import parse_forces, parse_solver_log
+    from hpe.postprocess.openfoam_parser import parse_forces
 
     forces_dir = case_dir / "postProcessing" / "forces1"
     forces = parse_forces(forces_dir)

@@ -13,7 +13,7 @@ References:
 from __future__ import annotations
 import math
 from hpe.core.models import G
-from hpe.constants import THOMA_C, NPSH_LAMBDA, NPSH_HIGH_LIMIT
+from hpe.constants import THOMA_C, NPSH_LAMBDA
 
 
 def calc_thoma_sigma(nq: float) -> float:

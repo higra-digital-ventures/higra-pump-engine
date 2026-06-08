@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from typing import Any, Dict, List, Optional
+from typing import List, Optional
 
 from fastapi import APIRouter, Depends, HTTPException
 from pydantic import BaseModel, Field
@@ -10,8 +10,6 @@ from sqlalchemy.orm import Session
 
 from hpe.core.database import get_session
 from hpe.core.db_models import (
-    Base,
-    OperatingPointRecord,
     Project,
     SizingResultRecord,
 )

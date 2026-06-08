@@ -208,7 +208,7 @@ HISTORY_OUTPUT= ( ITER, RMS_RES, AERO_COEFF, FLOW_COEFF )
 """
 
     if adjoint:
-        content += f"""
+        content += """
 % =========================================================
 % Adjoint-specific settings
 % =========================================================

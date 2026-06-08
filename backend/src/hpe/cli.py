@@ -13,7 +13,6 @@ from __future__ import annotations
 import argparse
 import csv
 import sys
-from pathlib import Path
 
 
 def main() -> None:
@@ -280,7 +279,7 @@ def _cmd_optimize(args: argparse.Namespace) -> None:
         result = run_bayesian(problem, n_trials=args.gen, seed=args.seed)
 
         print(f"  Best efficiency: {result['best_value']:.1%}")
-        print(f"  Best parameters:")
+        print("  Best parameters:")
         for k, v in result["best_params"].items():
             print(f"    {k} = {v:.2f}" if isinstance(v, float) else f"    {k} = {v}")
 
@@ -314,13 +313,13 @@ def _cmd_cfd(args: argparse.Namespace) -> None:
     print(f"  OpenFOAM available: {'Yes' if result.openfoam_available else 'No'}")
 
     if result.ran_simulation:
-        print(f"  Simulation: Completed")
+        print("  Simulation: Completed")
         if result.performance:
             print(f"  Head: {result.performance.head:.1f} m")
             print(f"  Efficiency: {result.performance.total_efficiency:.1%}")
             print(f"  Power: {result.performance.power/1000:.1f} kW")
     else:
-        print(f"  Simulation: Not executed")
+        print("  Simulation: Not executed")
         print(f"  Run manually: cd {result.case_dir} && ./run.sh")
 
     if result.errors:

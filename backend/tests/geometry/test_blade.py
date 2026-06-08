@@ -1,6 +1,5 @@
 """Tests for blade profile generation."""
 
-import math
 
 import pytest
 

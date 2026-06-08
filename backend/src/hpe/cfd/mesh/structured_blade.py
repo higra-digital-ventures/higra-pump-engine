@@ -35,7 +35,7 @@ from __future__ import annotations
 
 import math
 import logging
-from dataclasses import dataclass, field
+from dataclasses import dataclass
 from pathlib import Path
 from typing import Optional
 
@@ -44,9 +44,7 @@ from hpe.cfd.mesh.yplus import (
     YPlusEstimate,
     compute_first_cell_height,
     estimate_blade_chord,
-    o_layer_thickness,
 )
-from hpe.cfd.mesh.periodic import PeriodicConfig
 
 log = logging.getLogger(__name__)
 
@@ -565,10 +563,10 @@ def _write_blockmesh_dict(
                 f"({p[0]:.8f} {p[1]:.8f} {p[2]:.8f})" for p in e["points"]
             )
             lines.append(f"    spline {e['v0']} {e['v1']}")
-            lines.append(f"    (")
+            lines.append("    (")
             for p in e["points"]:
                 lines.append(f"        ({p[0]:.8f} {p[1]:.8f} {p[2]:.8f})")
-            lines.append(f"    )")
+            lines.append("    )")
     lines.append(");")
     lines.append("")
 
@@ -581,9 +579,9 @@ def _write_blockmesh_dict(
         lines.append(f"        type    {bnd['type']};")
         if bnd.get("neighbourPatch"):
             lines.append(f"        neighbourPatch {bnd['neighbourPatch']};")
-            lines.append(f"        transform  rotational;")
-            lines.append(f"        rotationAxis   (0 0 1);")
-            lines.append(f"        rotationCentre (0 0 0);")
+            lines.append("        transform  rotational;")
+            lines.append("        rotationAxis   (0 0 1);")
+            lines.append("        rotationCentre (0 0 0);")
         lines.append("        faces")
         lines.append("        (")
         for face in bnd["faces"]:

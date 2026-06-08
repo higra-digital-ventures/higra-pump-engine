@@ -12,7 +12,7 @@ At off-design conditions:
 
 from __future__ import annotations
 
-from hpe.core.models import G, SizingResult, VelocityTriangle
+from hpe.core.models import SizingResult, VelocityTriangle
 from hpe.sizing.velocity_triangles import (
     calc_euler_head,
     calc_inlet_triangle,

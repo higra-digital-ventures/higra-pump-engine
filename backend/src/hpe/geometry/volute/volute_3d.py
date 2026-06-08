@@ -7,7 +7,6 @@ circumferential station along the spiral path.
 from __future__ import annotations
 
 import math
-from pathlib import Path
 from typing import Optional
 
 import cadquery as cq

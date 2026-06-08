@@ -150,7 +150,6 @@ def _francis_ku(nq: float) -> float:
         return 0.62 + 0.004 * (nq - 40)
     else:
         return 0.78 + 0.001 * (nq - 80)
-    return max(0.60, min(0.85, ku))
 
 
 def _francis_d2_d1_ratio(nq: float) -> float:
@@ -161,7 +160,6 @@ def _francis_d2_d1_ratio(nq: float) -> float:
         return 0.65 + 0.003 * (nq - 40)
     else:
         return 0.83
-    return max(0.55, min(0.90, ratio))
 
 
 def _francis_b0_d1_ratio(nq: float) -> float:
@@ -172,7 +170,6 @@ def _francis_b0_d1_ratio(nq: float) -> float:
         return 0.08 + 0.004 * (nq - 30)
     else:
         return 0.28 + 0.002 * (nq - 80)
-    return max(0.06, min(0.40, ratio))
 
 
 def _francis_blade_count(nq: float) -> int:

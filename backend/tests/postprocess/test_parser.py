@@ -1,9 +1,7 @@
 """Tests for OpenFOAM result parser."""
 
 import tempfile
-from pathlib import Path
 
-import pytest
 
 from hpe.postprocess.openfoam_parser import parse_forces, parse_solver_log
 

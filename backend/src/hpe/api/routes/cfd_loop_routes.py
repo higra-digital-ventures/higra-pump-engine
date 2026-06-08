@@ -334,7 +334,7 @@ def cfd_sweep(req: SweepRequest) -> dict[str, Any]:
         n_iter=req.n_iter,
     )
 
-    import tempfile, os
+    import tempfile
     work_dir = Path(tempfile.gettempdir()) / f"hpe_sweep_{uuid.uuid4().hex[:8]}"
     sweep = run_cfd_sweep(sizing, config, work_dir)
 
@@ -413,7 +413,6 @@ def assess_cavitation(req: CavitationRequest) -> dict[str, Any]:
     from hpe.core.models import OperatingPoint
     from hpe.sizing.meanline import run_sizing
     from hpe.cfd.results.cavitation import assess_cavitation as _assess
-    import math
 
     op_bep = OperatingPoint(flow_rate=req.flow_rate, head=req.head, rpm=req.rpm)
     sizing_bep = run_sizing(op_bep)

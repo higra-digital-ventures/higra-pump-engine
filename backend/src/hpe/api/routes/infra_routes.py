@@ -56,7 +56,7 @@ def health_deep() -> dict[str, Any]:
 
     # ── MinIO ───────────────────────────────────────────────────────────
     try:
-        from minio import Minio  # type: ignore
+        from minio import Minio  # type: ignore  # noqa: F401
         endpoint = os.environ.get("HPE_MINIO_ENDPOINT", os.environ.get("MINIO_ENDPOINT", ""))
         checks["components"]["minio"] = {
             "configured": bool(endpoint),

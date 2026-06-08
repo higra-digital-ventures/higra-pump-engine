@@ -29,7 +29,6 @@ Usage
 
 from __future__ import annotations
 
-import json
 import logging
 from dataclasses import dataclass, field
 from datetime import datetime
@@ -41,9 +40,9 @@ log = logging.getLogger(__name__)
 try:
     from reportlab.lib.pagesizes import A4
     from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
-    from reportlab.lib.units import cm, mm
+    from reportlab.lib.units import cm, mm  # noqa: F401
     from reportlab.lib.colors import HexColor
-    from reportlab.platypus import (
+    from reportlab.platypus import (  # noqa: F401
         SimpleDocTemplate, Paragraph, Spacer, Table, TableStyle, PageBreak,
     )
     from reportlab.lib import colors

@@ -6,7 +6,6 @@ from __future__ import annotations
 
 import json
 import logging
-from typing import Any, Optional
 from uuid import uuid4
 
 from hpe.db.connection import get_connection

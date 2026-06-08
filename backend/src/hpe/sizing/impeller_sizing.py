@@ -83,14 +83,43 @@ def calc_d1_d2_ratio(nq: float) -> float:
     return max(0.30, min(0.80, ratio))
 
 
-def calc_blade_count(d2: float, d1: float, beta1: float, beta2: float) -> int:
-    """Pfleiderer correlation: Z = 6.5*(D2+D1)/(D2-D1)*sin((beta1+beta2)/2)."""
+def calc_blade_count(
+    d2: float, d1: float, beta1: float, beta2: float, nq: float | None = None
+) -> int:
+    """Blade count Z, specific-speed-aware.
+
+    The Pfleiderer correlation ``Z = 6.5*(D2+D1)/(D2-D1)*sin((beta1+beta2)/2)``
+    is valid for **radial** pumps (Nq <~ 80). Beyond that the eye grows
+    (D1 -> D2) and the term ``(D2+D1)/(D2-D1)`` diverges, so Pfleiderer
+    *over*-predicts. Physically the blade count *decreases* with specific
+    speed: mixed-flow impellers use ~5-7 blades, axial ~3-4.
+
+    Strategy by regime (when ``nq`` is provided):
+      * Nq <= 80   radial      -> Pfleiderer, clamped to [BLADE_COUNT_MIN, 12].
+      * 80 < Nq <= 140 mixed   -> linear 7 -> 5, clamped to [5, 7].
+      * Nq > 140   axial       -> linear 4 -> 3, clamped to [3, 4].
+
+    When ``nq`` is ``None`` the legacy radial behaviour is kept (back-compat).
+    """
     beta_avg_rad = math.radians((beta1 + beta2) / 2.0)
     denom = d2 - d1
-    if abs(denom) < 1e-6:
-        return 7
-    z = BLADE_COUNT_PFLEIDERER * (d2 + d1) / denom * math.sin(beta_avg_rad)
-    return max(BLADE_COUNT_MIN, min(BLADE_COUNT_MAX, round(z)))
+    z_pfleiderer = (
+        BLADE_COUNT_PFLEIDERER * (d2 + d1) / denom * math.sin(beta_avg_rad)
+        if abs(denom) >= 1e-6 else 7.0
+    )
+
+    # Radial regime (or unknown Nq): keep the validated Pfleiderer result.
+    if nq is None or nq <= 80.0:
+        return max(BLADE_COUNT_MIN, min(BLADE_COUNT_MAX, round(z_pfleiderer)))
+
+    # Mixed-flow: blade count falls from ~7 (Nq=80) to ~5 (Nq=140).
+    if nq <= 140.0:
+        z = 7.0 - (nq - 80.0) / 60.0 * 2.0
+        return max(5, min(7, round(z)))
+
+    # Axial: ~4 (Nq=140) down to ~3 (Nq>=200).
+    z = 4.0 - (min(nq, 200.0) - 140.0) / 60.0
+    return max(3, min(4, round(z)))
 
 
 def calc_outlet_width_ratio(nq: float) -> float:
@@ -170,7 +199,7 @@ def size_impeller(
     cm1_approx = flow_rate / inlet_area_approx if inlet_area_approx > 0 else 0.1
     u1 = math.pi * d1 * rpm / 60.0
     beta1_approx = math.degrees(math.atan2(cm1_approx, u1))
-    blade_count = calc_blade_count(d2, d1, beta1_approx, beta2)
+    blade_count = calc_blade_count(d2, d1, beta1_approx, beta2, nq)
 
     # 6. Compute variable blockage factors (#2)
     tau1 = calc_blockage_factor(d1, b1_approx, blade_count, blade_thickness, is_inlet=True)
@@ -185,7 +214,7 @@ def size_impeller(
     beta1 = math.degrees(math.atan2(cm1, u1))
 
     # 9. Refine blade count with actual beta1
-    blade_count = calc_blade_count(d2, d1, beta1, beta2)
+    blade_count = calc_blade_count(d2, d1, beta1, beta2, nq)
 
     # 10. Apply user overrides and recalculate dependent quantities (A5)
     if overrides:
@@ -209,7 +238,7 @@ def size_impeller(
         # Recompute tau2 for the (possibly new) d2/b2
         tau2 = calc_blockage_factor(d2, b2, blade_count, blade_thickness, is_inlet=False)
         # Refresh blade count after geometry changes
-        blade_count = calc_blade_count(d2, d1, beta1, beta2)
+        blade_count = calc_blade_count(d2, d1, beta1, beta2, nq)
 
     return ImpellerDimensions(
         d2=d2, d1=d1, d1_hub=d1_hub,

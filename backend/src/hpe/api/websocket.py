@@ -44,7 +44,8 @@ import asyncio
 import logging
 import time
 import uuid
-from typing import Any, Optional
+from pathlib import Path
+from typing import Optional
 
 from fastapi import APIRouter, WebSocket, WebSocketDisconnect
 from fastapi.responses import JSONResponse

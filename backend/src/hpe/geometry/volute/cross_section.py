@@ -7,7 +7,6 @@ station, which are then lofted to create the 3D volute.
 from __future__ import annotations
 
 import math
-from typing import List, Tuple
 
 
 def circular_section(

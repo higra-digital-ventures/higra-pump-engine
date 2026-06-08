@@ -7,7 +7,6 @@ actual STEP surface.
 
 from __future__ import annotations
 
-import math
 
 
 def generate_blockmesh_dict(

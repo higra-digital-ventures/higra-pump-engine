@@ -272,7 +272,6 @@ class EtaSurrogate:
 
         # For now, re-fit the existing pipeline on augmented data.
         # In production: keep a rolling buffer in Redis/Postgres.
-        from sklearn.pipeline import Pipeline
 
         existing_X = getattr(self, "_X_buffer", np.empty((0, X_new.shape[1])))
         existing_y = getattr(self, "_y_buffer", np.empty(0))

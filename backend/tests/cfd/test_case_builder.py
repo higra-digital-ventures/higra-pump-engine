@@ -5,7 +5,7 @@ from pathlib import Path
 
 import pytest
 
-from hpe.cfd.openfoam.boundary_conditions import BCValues, calc_bc_values
+from hpe.cfd.openfoam.boundary_conditions import calc_bc_values
 from hpe.cfd.openfoam.case_builder import build_case
 from hpe.core.models import SizingResult
 

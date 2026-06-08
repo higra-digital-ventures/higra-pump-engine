@@ -5,7 +5,6 @@ from __future__ import annotations
 import pytest
 
 from hpe.geometry.runner.blockage import (
-    BlockageDistribution,
     BlockageMethod,
     BlockageSpec,
     apply_blockage_to_velocity,

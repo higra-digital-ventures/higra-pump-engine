@@ -12,7 +12,6 @@ from hpe.physics.compressible import (
     R134A,
     CompressibleTriangle,
     FluidState,
-    GasProperties,
     choking_mass_flow,
     compressible_triangle,
     compute_fluid_state,

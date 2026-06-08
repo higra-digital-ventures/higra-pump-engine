@@ -2,7 +2,6 @@
 
 from __future__ import annotations
 
-import math
 
 import pytest
 
@@ -12,7 +11,6 @@ from hpe.physics.stress import (
     CAST_IRON,
     DUPLEX_2205,
     STAINLESS_316L,
-    MaterialProperties,
     StressResult,
     analyze_stress,
     calc_bending_stress,

@@ -6,7 +6,7 @@ import logging
 import math
 import random
 from dataclasses import dataclass, field
-from typing import Any, Callable, Optional
+from typing import Callable, Optional
 
 log = logging.getLogger(__name__)
 
