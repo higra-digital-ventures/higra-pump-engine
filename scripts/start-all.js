@@ -13,6 +13,10 @@
 const { spawn, execSync } = require("child_process");
 const path = require("path");
 const fs = require("fs");
+const { findFreePort } = require("./find-port");
+
+const PREFERRED_BACKEND_PORT = Number(process.env.HPE_BACKEND_PORT || 8000);
+const PREFERRED_FRONTEND_PORT = Number(process.env.HPE_FRONTEND_PORT || 3000);
 
 const ROOT = path.resolve(__dirname, "..");
 const BACKEND_DIR = path.join(ROOT, "backend");
@@ -81,26 +85,47 @@ if (!fs.existsSync(nodeModules)) {
   execSync("npm install", { cwd: FRONTEND_DIR, stdio: "inherit" });
 }
 
-// --- Start Backend ---
 // Add backend/src to PYTHONPATH so uvicorn can find the hpe package
 const srcDir = path.join(BACKEND_DIR, "src");
 const currentPythonPath = process.env.PYTHONPATH || "";
 const pythonPath = currentPythonPath ? `${srcDir};${currentPythonPath}` : srcDir;
 
-spawnProcess(
-  "backend",
-  "python",
-  ["-m", "uvicorn", "hpe.api.app:app", "--reload", "--port", "8000"],
-  BACKEND_DIR,
-  CYAN,
-  { PYTHONPATH: pythonPath }
-);
+(async () => {
+  // Pick free ports, falling back to the next available one if busy.
+  const backendPort = await findFreePort(PREFERRED_BACKEND_PORT);
+  const frontendPort = await findFreePort(PREFERRED_FRONTEND_PORT);
 
-// --- Start Frontend ---
-// Use npx to ensure vite is found from local node_modules
-spawnProcess("frontend", "npx", ["vite"], FRONTEND_DIR, GREEN, {});
+  if (backendPort !== PREFERRED_BACKEND_PORT) {
+    console.log(`${YELLOW}[setup]${RESET} Backend port ${PREFERRED_BACKEND_PORT} busy — using ${backendPort}`);
+  }
+  if (frontendPort !== PREFERRED_FRONTEND_PORT) {
+    console.log(`${YELLOW}[setup]${RESET} Frontend port ${PREFERRED_FRONTEND_PORT} busy — using ${frontendPort}`);
+  }
 
-console.log(`
-${CYAN}[backend]${RESET}  http://localhost:8000
-${GREEN}[frontend]${RESET} http://localhost:3000
+  // --- Start Backend ---
+  spawnProcess(
+    "backend",
+    "python",
+    ["-m", "uvicorn", "hpe.api.app:app", "--reload", "--port", String(backendPort)],
+    BACKEND_DIR,
+    CYAN,
+    { PYTHONPATH: pythonPath }
+  );
+
+  // --- Start Frontend ---
+  // Use npx to ensure vite is found from local node_modules.
+  // HPE_BACKEND_PORT tells vite where to proxy; HPE_FRONTEND_PORT sets its port.
+  spawnProcess(
+    "frontend",
+    "npx",
+    ["vite", "--port", String(frontendPort), "--strictPort"],
+    FRONTEND_DIR,
+    GREEN,
+    { HPE_BACKEND_PORT: String(backendPort), HPE_FRONTEND_PORT: String(frontendPort) }
+  );
+
+  console.log(`
+${CYAN}[backend]${RESET}  http://localhost:${backendPort}
+${GREEN}[frontend]${RESET} http://localhost:${frontendPort}
 `);
+})();

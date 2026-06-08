@@ -1,7 +1,11 @@
 import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react'
 
-const BACKEND = 'http://localhost:8000'
+// Backend target — overridable via HPE_BACKEND_PORT so the dev proxy follows
+// the backend when it falls back to another port (see scripts/start-all.js).
+const BACKEND_PORT = process.env.HPE_BACKEND_PORT || '8000'
+const BACKEND = `http://localhost:${BACKEND_PORT}`
+const FRONTEND_PORT = Number(process.env.HPE_FRONTEND_PORT || 3000)
 
 // All API path prefixes that should be proxied to the backend in dev mode.
 // Keep in sync with frontend/nginx.conf location rules.
@@ -45,7 +49,7 @@ const API_PREFIXES = [
 export default defineConfig({
   plugins: [react()],
   server: {
-    port: 3000,
+    port: FRONTEND_PORT,
     proxy: {
       // WebSocket — must come first
       '/ws': {
