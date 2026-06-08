@@ -17,6 +17,7 @@ class TestFullPipeline:
     """Complete pipeline: OperatingPoint → Sizing → Geometry → Physics → Export."""
 
     def test_centrifugal_pump_pipeline(self) -> None:
+        pytest.importorskip("cadquery", reason="3D runner export requires CadQuery")
         from hpe.geometry.runner import generate_runner_from_sizing
         from hpe.geometry.runner.export import export_runner
         from hpe.physics.curves import generate_curves
@@ -56,6 +57,7 @@ class TestFullPipeline:
         assert stability.bep_efficiency > 0.5
 
     def test_volute_and_distributor(self) -> None:
+        pytest.importorskip("cadquery", reason="3D volute/distributor export requires CadQuery")
         from hpe.geometry.distributor import generate_distributor_from_sizing
         from hpe.geometry.volute import generate_volute_from_sizing
         from hpe.sizing import run_sizing
@@ -120,6 +122,7 @@ class TestFullPipeline:
         assert pred["efficiency"] > 0
 
     def test_cfd_case_generation(self) -> None:
+        pytest.importorskip("cadquery", reason="CFD case geometry export requires CadQuery")
         from hpe.pipeline import run_cfd_pipeline
         from hpe.sizing import run_sizing
 

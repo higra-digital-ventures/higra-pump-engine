@@ -130,6 +130,7 @@ class TestE2EFullWorkflow:
         assert data["diffusion_ratio"] > 0
 
     def test_60_geometry_impeller(self) -> None:
+        pytest.importorskip("cadquery", reason="3D impeller endpoint requires CadQuery")
         r = client.post("/api/v1/geometry/impeller", json={
             "flow_rate": 0.05, "head": 30.0, "rpm": 1750,
         })
