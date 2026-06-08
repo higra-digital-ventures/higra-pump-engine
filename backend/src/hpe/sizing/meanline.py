@@ -10,6 +10,7 @@ Improvements:
 
 from __future__ import annotations
 
+import copy
 import logging
 import math
 import time
@@ -47,7 +48,11 @@ _CACHE_MAX = 256
 
 
 def _get_cached(key: tuple) -> SizingResult | None:
-    return _sizing_cache.get(key)
+    # Return a deep copy so callers that mutate the result (e.g. off-design
+    # physics writing back into velocity_triangles) cannot corrupt the cached
+    # object and poison every subsequent run_sizing() with the same key.
+    cached = _sizing_cache.get(key)
+    return copy.deepcopy(cached) if cached is not None else None
 
 
 def _set_cached(key: tuple, result: SizingResult) -> None:
@@ -55,7 +60,9 @@ def _set_cached(key: tuple, result: SizingResult) -> None:
         # Evict oldest entry
         oldest = next(iter(_sizing_cache))
         del _sizing_cache[oldest]
-    _sizing_cache[key] = result
+    # Store a copy too, so a later mutation of the returned object (the first,
+    # non-cached return path) cannot reach back into the cache.
+    _sizing_cache[key] = copy.deepcopy(result)
 
 
 # ---------------------------------------------------------------------------

@@ -2,6 +2,8 @@
 
 import pytest
 
+pytest.importorskip("optuna", reason="Bayesian optimizer requires Optuna")
+
 from hpe.optimization.bayesian import run_bayesian
 from hpe.optimization.problem import OptimizationProblem
 
