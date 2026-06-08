@@ -1,4 +1,4 @@
-# HPE — Context (Estado Atual)
+# HPE — Higra Pump Engine (Estado Atual)
 
 > Atualizar este arquivo ao final de cada sessao de desenvolvimento.
 > Este e o primeiro documento que o Claude Code deve ler antes de qualquer tarefa.
@@ -7,100 +7,128 @@
 
 ## Estado Geral
 
-- **Data**: Abril 2026
-- **Fases implementadas**: 1–20 completas (paridade Ansys CFD: multi-domínio AMI, cavitação ZGB, prism layers, spanwise, VTU export, Q-criterion, loss audit, turbo views, transient sliding mesh, FFT BPF, radial forces, γ-Reθ, mesh morphing, multi-stage, benchmarks SHF/ERCOFTAC, PDF reports)
-- **Progresso geral**: ~100% — stack completa; aguardando deploy real + dados CFD reais
-- **Proximo marco**: `docker compose up --build` em servidor + seed training_log com CFD runs reais
+- **Data**: Junho 2026
+- **Escopo**: Plataforma de turbomaquinas hidraulicas — **bombas, turbinas Francis e pump-turbines** (nao apenas bombas, apesar do nome). Inclui tambem axiais, inducers, ventiladores (sirocco/axial fan) e turbina radial.
+- **Fases 1–20**: completas (pipeline base — ver historico). Sobre elas foram adicionados **Blocos A–J (#1–100)**: CFD avancado, turbulencia/multifase, transferencia de calor, acustica, otimizacao avancada, V&V e UI/DevOps.
+- **Progresso**: stack completa e ampla (~66k linhas Python, 350 arquivos, 52 arquivos de teste). Aguardando deploy real + popular `training_log` com runs CFD reais.
+- **Proximo marco**: `docker compose up --build` em servidor + seed `training_log` + runs CFD reais.
 
 ---
 
-## Arquitetura Implementada (6 Fases)
+## Arquitetura Real (codigo no disco)
 
 ```
-hpe/
-├── sizing/          # Fase 1 — Meanline 1D (Gülich), CLI, API
-├── geometry/        # Fase 1/4/10 — Runner paramétrico, voluta, export.py (CadQuery), storage.py (MinIO)
-├── data/            # Fase 1 — ETL bancada, FeatureStore, training_log, seed
-├── ai/
-│   ├── surrogate/   # Fase 1 (XGBoost v1) + Fase 3 (GP v2) + evaluator
-│   ├── pinn/        # Fase 6 — Physics-Informed NN (PyTorch + numpy fallback)
-│   └── assistant/   # Fase 6 — RAG engineering assistant + offline rules
-├── cfd/             # Fase 2/9 — OpenFOAM case builder, SU2, mesh, extractor
-│   └── mesh/        # Fase 9 — snappy + structured_blade (O-H) + yplus + periodic
-├── optimization/    # Fase 3 — NSGA-II (DEAP), Bayesian (Optuna), surrogate-assisted
-├── orchestrator/    # Fase 5 — Celery tasks, Redis status, design versioning
-└── api/             # FastAPI v2.0 — sizing, geometry, surrogate, voluta, WebSocket
+higra-pump-engine/
+├── backend/
+│   ├── pyproject.toml         # pacote `higra-pump-engine`, console script `hpe`
+│   ├── alembic.ini            # migrations
+│   └── src/hpe/
+│       ├── sizing/        Meanline 1D + DB de projetos
+│       │   meanline.py, specific_speed.py, velocity_triangles.py,
+│       │   impeller_sizing.py, efficiency.py, cavitation.py, blade_loading.py,
+│       │   convergence_solver.py, validator.py, multistage.py,
+│       │   francis.py, radial_inflow_turbine.py, axial.py, axial_fan.py,
+│       │   sirocco_fan.py, inducer.py, return_channel.py,
+│       │   design_db.py, design_templates.py, geometry_database.py
+│       ├── geometry/      Parametrica 3D (CadQuery/OCCT, fallback 2D)
+│       │   parametric.py, models.py, export.py, storage.py (MinIO),
+│       │   runner/ (blade, meridional), blade/, meridional/, volute/,
+│       │   distributor/ (guide_vanes), draft_tube/, inverse/ (inverse design 3D)
+│       ├── physics/       Off-design: euler.py, losses.py, performance.py, stability.py
+│       ├── cfd/           OpenFOAM + SU2 + Ansys + malha + monitoring
+│       │   pipeline.py, sweep.py, pump_curve.py, doe.py, doe_runner.py,
+│       │   design_loop.py, adjoint_loop.py, domain_extent.py, geo_validator.py,
+│       │   turbogrid_wrapper.py, pcf_generator.py, cfx_package.py,
+│       │   openfoam/, su2/, ansys_cfx/, ansys_fluent/,
+│       │   mesh/ (snappy, blockmesh, structured_blade, prism_layers, yplus, periodic, tools),
+│       │   monitoring/, postprocessing/, results/
+│       ├── optimization/  nsga2.py, bayesian.py, surrogate_opt.py, problem.py,
+│       │   evaluator.py, optimizer.py, advanced_methods.py, enhancements.py,
+│       │   doe.py, rsm.py, rrs.py
+│       ├── ai/
+│       │   surrogate/  v1_xgboost.py, v2_gp.py, evaluator.py, dataset.py,
+│       │   │            model.py, predictor.py, eta_predictor.py
+│       │   pinn/       model.py, losses.py, trainer.py
+│       │   assistant/  rag.py, offline_rules.py, interpreter.py, recommender.py
+│       │   anomaly/    detector.py (Isolation Forest), validators.py
+│       │   training/   trainer.py, auto_train.py, experiment.py
+│       ├── pipeline/      cfd_pipeline.py — geometria→malha→solver→pos
+│       ├── orchestrator/  Celery (celery_app/config/tasks), status.py (Redis), versions.py
+│       ├── api/           FastAPI — DOIS apps (ver abaixo) + ~42 modulos de rota
+│       ├── postprocess/   openfoam_parser.py, metrics.py
+│       ├── validation/    benchmark.py, benchmarks.py (SHF/ERCOFTAC/TUD)
+│       ├── reports/       generator.py (PDF/HTML/MD)
+│       ├── data/          bancada_etl.py, bancada_seed.py, feature_store.py, training_log.py
+│       ├── core/          models.py, enums.py, config.py, db_models.py,
+│       │                  database.py, persistence.py, udp.py, project_file.py
+│       ├── db/            connection.py, repositories.py, migrate.py, schema.sql
+│       ├── migrations/    alembic versions
+│       └── infra/  io/  cli/ (advanced_commands.py)
+├── frontend/          React 18 + TS + Vite + three.js + recharts (~80 componentes)
+│   └── src/  App.tsx, components/, pages/, hooks/, services/, i18n/, utils/, styles/
+├── docs/  dataset/  models/  mlruns/  mlflow.db  scripts/  tests/  output/  data/
+├── Dockerfile  docker-compose.yml  Makefile  .env.example  conftest.py
+└── CLAUDE.md  README.md
 ```
 
----
-
-## O Que Ja Existe (implementado)
-
-### Fase 1 — MVP
-- [x] ETL bancada (`hpe/data/bancada_etl.py`) — 2.931 linhas, 35 features, Parquet
-- [x] training_log schema (PostgreSQL `hpe.training_log`) — 26 colunas
-- [x] Surrogate v1 XGBoost (`hpe/ai/surrogate/v1_xgboost.py`) — RMSE 2.8-3.0%, R2 0.986
-- [x] SurrogateEvaluator (`hpe/ai/surrogate/evaluator.py`) — interface versao-agnostica
-- [x] FeatureStore (`hpe/data/feature_store.py`)
-- [x] API FastAPI v2.0 — POST /sizing/run, /geometry/run, /surrogate/predict, /surrogate/similar, GET /health
-- [x] CLI `hpe sizing/curves/analyze/cfd/optimize/batch`
-- [x] 12 skill files em `.claude/skills/`
-- [x] M1.8 Validacao Integrada — 435 pontos, MAPE 11.69% < 15% (APROVADO)
-- [x] 49 testes de integracao da API (100% passing)
-
-### Fase 2 — CFD Pipeline
-- [x] `hpe/cfd/pipeline.py` — run_cfd_pipeline() — sizing→caso OpenFOAM→solver→training_log
-- [x] `hpe/cfd/openfoam/` — case.py, boundary_conditions.py, solver_config.py
-- [x] `hpe/cfd/mesh/snappy.py` — snappyHexMesh + blockMesh + quality check
-- [x] `hpe/cfd/results/extract.py` — parse postProcessing/ → H, Q, eta, P
-- [x] `hpe/cfd/su2/config.py` — config.cfg RANS + adjoint
-
-### Fase 3 — Surrogate v2 + Otimizacao
-- [x] `hpe/ai/surrogate/v2_gp.py` — GP com incerteza (sklearn), subsample 500pts
-- [x] `hpe/optimization/problem.py` — DesignPoint, ObjectiveValues, OptimizationProblem
-- [x] `hpe/optimization/nsga2.py` — NSGA-II (DEAP ou implementacao propria)
-- [x] `hpe/optimization/bayesian.py` — Bayesian (Optuna ou random search fallback)
-- [x] `hpe/optimization/surrogate_opt.py` — 2 estagios: surrogate fast + sizing validate
-
-### Fase 4 — Voluta + Feedback Loop
-- [x] `hpe/data/bancada_seed.py` — seed training_log com 460 registros bancada
-- [x] `hpe/geometry/volute/pipeline.py` — run_volute_pipeline(SizingResult)
-- [x] `hpe/api/volute_endpoint.py` — POST /volute/run
-
-### Fase 5 — Orquestrador
-- [x] `hpe/orchestrator/config.py` — Celery app (3 filas: fast/cfd/optimize)
-- [x] `hpe/orchestrator/tasks.py` — 6 tasks Celery + _FakeTask sync fallback
-- [x] `hpe/orchestrator/status.py` — Redis status tracker + in-memory fallback
-- [x] `hpe/orchestrator/versions.py` — DesignVersion + save_version()
-- [x] `hpe/api/websocket.py` — WS /ws/pipeline/{run_id} + POST /pipeline/run
-
-### Fase 6 — PINN + RAG
-- [x] `hpe/ai/pinn/model.py` — PumpPINN (PyTorch + numpy fallback), L_data + L_euler + L_cont
-- [x] `hpe/ai/pinn/losses.py` — euler_loss, continuity_loss, efficiency_bound_loss
-- [x] `hpe/ai/pinn/trainer.py` — train_pinn_from_bancada(), early stopping, MLflow
-- [x] `hpe/ai/assistant/rag.py` — EngineeringAssistant, RAG local + Claude API opcional
-- [x] `hpe/ai/assistant/offline_rules.py` — regras Gülich: cavitacao, eficiencia, estabilidade
+> **Nota**: existe `tests/` na raiz **e** `backend/tests/` (52 arquivos de teste). O empacotamento (pyproject, alembic) vive em `backend/`.
 
 ---
 
-## O Que NAO Existe Ainda
+## API — dois apps FastAPI
 
-- [x] CadQuery no Docker — stage `backend-cad` no Dockerfile raiz; `export_runner_3d()` + `upload_geometry_files()` com fallback gracioso
-- [x] Testes E2E Fases 2-6 — `tests/test_e2e_phases_2_6.py` (53 testes, 2 skipped/Optuna)
-- [x] Docker Compose producao — nginx + Celery (fast/cfd/opt) + Redis + MinIO + Flower
-- [x] Frontend integrado — PipelinePanel (tab Pipeline Completo) + AssistantChat (tab Assistant)
-- [x] Optuna no Docker — `pip install -e ".[optimization]"` instala optuna (ja na imagem)
-- [ ] training_log com dados CFD reais — `bancada_seed.py` popula os 460 bancada; CFD aguarda runs
-- [ ] Deploy real — `docker compose up --build` no servidor + .env com segredos de producao
+| App | Modulo | Uso |
+|-----|--------|-----|
+| **Completo** | `hpe.api.app:app` | Aplicacao de producao. Inclui ~42 routers (auth, sizing, analysis, geometry, surrogate, inverse_design 2D/3D, optimize, io, blade, db/design_db, convergence, volute, mri, turbotype, lete, noise, batch, cfd_loop, cfd_advanced=phase_17_20, physics, infra, rrs, blade_collision, template, domain, udp, blockage, ansys, lean_sweep, version, assistant, WS pipeline/optimize). Middleware: RateLimit (120 rpm) + Multitenancy. |
+| **Focado v2.0** | `hpe.api.main:app` | Sub-app enxuto da spec v2.0: `POST /sizing/run`, `POST /geometry/run`, `POST /surrogate/predict`, `GET /surrogate/similar`, `GET /health`. Bom para deploy standalone/testes. |
+
+> Em producao, o **app completo** (`hpe.api.app:app`) e o que e servido atras do nginx.
+
+---
+
+## O Que NAO Existe Ainda (pendencias reais)
+
+- [ ] `training_log` com dados CFD reais — `bancada_seed.py` popula os 460 da bancada; CFD aguarda runs reais.
+- [ ] Deploy real — `docker compose up --build` no servidor + `.env` com segredos de producao.
+- [ ] Modelos treinados versionados — `models/` esta no `.gitignore`; treinar surrogate v1/v2 e PINN apos seed.
 
 ---
 
 ## Bloqueios Conhecidos
 
-- **CadQuery**: nao instalado localmente — retorna 2D profiles. Docker: stage `backend-cad` disponivel
-- **Celery/Redis**: nao rodando localmente — orchestrator usa _FakeTask (sincrono). Docker: ok
-- **Tabela bancada SIGS**: `public.hgr_lab_reg_teste` no banco `higra_sigs` (localhost:5432, somente leitura)
-- **models/ no .gitignore**: `surrogate_v1.pkl` (~8MB), `surrogate_v2_gp.pkl`, `pinn_v1.pkl` ignorados
+- **CadQuery**: pode nao estar instalado localmente — `geometry/export.py` retorna perfis 2D com fallback gracioso. Docker: stage `backend-cad`.
+- **Celery/Redis**: nao rodando localmente — orchestrator usa `_FakeTask` (sincrono). Docker: ok.
+- **OpenFOAM/SU2/Ansys**: instalacoes system-level; modulos CFD tem dry-run/fallback quando ausentes.
+- **Tabela bancada SIGS**: `public.hgr_lab_reg_teste` no banco `higra_sigs` (localhost:5432, **somente leitura — nunca escrever**).
+- **models/ no .gitignore**: `surrogate_v1.pkl`, `surrogate_v2_gp.pkl`, `pinn_v1.pkl` ignorados.
+
+---
+
+## Como Executar
+
+```bash
+# API completa (producao)
+PYTHONPATH=backend/src uvicorn hpe.api.app:app --port 8000 --reload
+
+# API focada v2.0 (standalone)
+PYTHONPATH=backend/src uvicorn hpe.api.main:app --port 8000 --reload
+
+# CLI (console script `hpe` ou modulo)
+PYTHONPATH=backend/src python -m hpe.cli sizing --flow 0.05 --head 30 --rpm 1750
+
+# Testes
+PYTHONPATH=backend/src pytest backend/tests/ -v
+PYTHONPATH=backend/src pytest tests/ -v
+
+# Seed training_log (460 registros bancada)
+PYTHONPATH=backend/src python backend/src/hpe/data/bancada_seed.py
+
+# Treinar PINN
+PYTHONPATH=backend/src python -c "from hpe.ai.pinn.trainer import train_pinn_from_bancada; train_pinn_from_bancada(epochs=100)"
+
+# Frontend
+cd frontend && npm run dev
+```
 
 ---
 
@@ -116,9 +144,7 @@ cp .env.example .env
 ### Subir stack
 ```bash
 docker compose up --build -d
-
-# Verificar todos saudaveis (aguarda ~30s para DB inicializar)
-docker compose ps
+docker compose ps          # aguarda ~30s para DB inicializar
 
 # Smoke test
 curl http://localhost:3000/health
@@ -127,14 +153,18 @@ curl http://localhost:3000/sizing/run \
   -d '{"Q":0.05,"H":30,"n":1750}'
 ```
 
-### Seed training_log
+### Seed training_log (uma vez apos deploy)
 ```bash
-# 460 registros da bancada — rodar uma vez apos deploy
-docker compose exec backend \
-  python /app/backend/src/hpe/data/bancada_seed.py
+docker compose exec backend python /app/backend/src/hpe/data/bancada_seed.py
 ```
 
-### Verificar servicos
+### Treinar modelos (apos seed)
+```bash
+docker compose exec backend python -c "from hpe.ai.surrogate.v1_xgboost import train; train()"
+docker compose exec backend python -c "from hpe.ai.surrogate.v2_gp import train; train()"  # requer >100 registros
+```
+
+### Servicos
 | Servico | URL |
 |---------|-----|
 | Frontend | http://localhost:3000 |
@@ -142,18 +172,9 @@ docker compose exec backend \
 | Flower (Celery) | http://localhost:5555 (admin:hpe2026) |
 | MinIO console | http://localhost:9001 (minioadmin / senha do .env) |
 
-### Treinar modelos (apos seed)
-```bash
-# Surrogate v1 (XGBoost)
-docker compose exec backend \
-  python -c "from hpe.ai.surrogate.v1_xgboost import train; train()"
+---
 
-# Surrogate v2 (GP) — requer >100 registros no training_log
-docker compose exec backend \
-  python -c "from hpe.ai.surrogate.v2_gp import train; train()"
-```
-
-## Fases Concluidas (historico)
+## Historico — Fases 1–20 (pipeline base)
 
 | Fase | O que fez | Status |
 |------|-----------|--------|
@@ -163,20 +184,30 @@ docker compose exec backend \
 | 4 | Voluta pipeline, training_log seed (460 registros) | DONE |
 | 5 | Celery orchestrator (3 filas), Redis status, WebSocket, DesignVersion | DONE |
 | 6 | PINN (PyTorch + numpy fallback), RAG assistant (Gulich KB + Claude API) | DONE |
-| 7 | Frontend: PipelinePanel no App.tsx, tab Pipeline Completo no sidebar | DONE |
-| 8 | Docker: nginx proxy corrigido (WS + v2 routes), Dockerfiles, deps corrigidas | DONE |
-| 9 | Malha estruturada O-H (TurboGrid equiv): yplus.py, periodic.py, structured_blade.py, case.py mesh_mode | DONE |
-| 10 | CadQuery Docker (backend-cad stage), geometry/export.py, geometry/storage.py (MinIO), /geometry/run step_url/stl_url | DONE |
-| 11 | Multi-point CFD sweep (50-130% BEP), pump curve H-Q + η-Q com polinômio grau 2, REST /cfd/sweep + /cfd/pump_curve | DONE |
-| 12 | Convergência adaptativa (ConvergenceMonitor: detecção divergência/estagnação), k-ω SST (write_omega, fvSolution) | DONE |
-| 13 | Blade loading Cp PS/SS (blade_loading.py), cavitação σ + NPSHr + Nss (cavitation.py), REST /cfd/blade_loading + /cfd/cavitation | DONE |
-| 14 | SU2 adjoint: runner.py (direto + adjoint), sensitivity.py (gradientes normalizados dJ/dβ₂, dJ/dD₂), REST /cfd/su2/adjoint | DONE |
-| 15 | DoE LHS/Sobol/factorial (doe.py + DesignSpace), runner paralelo (doe_runner.py + retreino surrogate), REST /cfd/doe | DONE |
-| 16 | Loop adjoint fechado (adjoint_loop.py: gradiente→sizing→mesh→CFD), UI Cavitação (CavitationPanel + curva NPSHr-Q), UI Simulação CFD (CFDSimPanel: dry-run + sweep H-Q + pump curve SVG) | DONE |
-| 17 | Paridade Ansys I: multi_domain.py rotor+voluta cyclicAMI, cavitation_case.py Zwart-Gerber-Belamri, prism_layers.py y+ targeting, spanwise_loading.py hub/mid/tip | DONE |
-| 18 | Visualização campo CFD: vtk_export.py VTU+JSON sampled, field_features.py Q-criterion/streamlines/isosurfaces, loss_audit.py Kock/Denton entropy, turbo_views.py meridional+blade2blade | DONE |
-| 19 | Transiente + ruído: transient.py pimpleFoam sliding mesh, pulsations.py FFT BPF, radial_forces.py Stepanoff Kr, transition_model.py Menter-Langtry γ-Reθ kOmegaSSTLM | DONE |
-| 20 | Otimização avançada + workflow: morph.py displacementLaplacian mesh morphing, multi_stage.py bombas N estágios, validation/benchmarks.py SHF/ERCOFTAC/TUD, reports/generator.py PDF/HTML/MD | DONE |
+| 7 | Frontend: PipelinePanel, tab Pipeline Completo | DONE |
+| 8 | Docker: nginx proxy (WS + v2 routes), Dockerfiles, deps | DONE |
+| 9 | Malha estruturada O-H (TurboGrid equiv): yplus, periodic, structured_blade | DONE |
+| 10 | CadQuery Docker (backend-cad), geometry/export.py, storage.py (MinIO) | DONE |
+| 11 | Multi-point CFD sweep (50-130% BEP), pump curve H-Q + eta-Q, /cfd/sweep | DONE |
+| 12 | Convergencia adaptativa (ConvergenceMonitor), k-omega SST | DONE |
+| 13 | Blade loading Cp PS/SS, cavitacao sigma + NPSHr + Nss | DONE |
+| 14 | SU2 adjoint: runner direto+adjoint, sensitivity (dJ/dbeta2, dJ/dD2) | DONE |
+| 15 | DoE LHS/Sobol/factorial, runner paralelo + retreino surrogate | DONE |
+| 16 | Loop adjoint fechado, UI Cavitacao, UI Simulacao CFD | DONE |
+| 17 | Paridade Ansys I: multi_domain cyclicAMI, cavitacao ZGB, prism layers, spanwise | DONE |
+| 18 | Visualizacao campo CFD: VTU export, Q-criterion/streamlines, loss audit, turbo views | DONE |
+| 19 | Transiente + ruido: pimpleFoam sliding mesh, FFT BPF, radial forces, gamma-Re_theta | DONE |
+| 20 | Otim. avancada: mesh morphing, multi-stage, benchmarks SHF/ERCOFTAC/TUD, reports PDF | DONE |
+
+## Historico — Blocos A–J (#1–100, sobre as fases)
+
+| Bloco | # | Tema | Commit |
+|-------|---|------|--------|
+| A+B | 1–20 | Solver core + mesh avancado | 676f314 |
+| C+D | 21–40 | Turbulencia + multifase avancado | 29dfca7 |
+| E+F | 41–60 | Transferencia de calor + acustica | 674a510 |
+| G+H | 61–80 | Otimizacao avancada + V&V | 178970c |
+| I+J | 81–100 | UI avancada + DevOps | 6f66edd |
 
 ---
 
@@ -187,39 +218,20 @@ docker compose exec backend \
 | Surrogate v1 | XGBoost | Dados limitados; RMSE 2.8% validado |
 | Surrogate v2 | GP sklearn | Incerteza nativa; subsample 500pts para O(n3) |
 | Otimizacao | NSGA-II + Optuna | Multi-objetivo; fallback se dep nao instalada |
-| CFD | OpenFOAM + SU2 adjoint | Industry standard; SU2 para gradiente |
+| CFD | OpenFOAM + SU2 adjoint + Ansys CFX/Fluent | Industry standard; SU2 para gradiente |
 | PINN | PyTorch + numpy fallback | Portabilidade sem GPU obrigatoria |
 | RAG | Local KB + Claude API opcional | Offline-first; upgradeable sem mudar interface |
-| Feature store | Parquet local | Fase 1-3; migrar para S3/MinIO na Fase 4+ |
+| Feature store | Parquet local | Migrar para S3/MinIO em producao |
 | Normalizacao | StandardScaler | Compativel com GP e PINN |
-
----
-
-## Como Executar
-
-```bash
-# API
-PYTHONPATH=backend/src uvicorn hpe.api.main:app --port 8000 --reload
-
-# CLI
-PYTHONPATH=backend/src python -m hpe.cli sizing --flow 0.05 --head 30 --rpm 1750
-
-# Testes
-PYTHONPATH=backend/src pytest tests/ -v
-
-# Seed training_log
-PYTHONPATH=backend/src python backend/src/hpe/data/bancada_seed.py
-
-# Treinar PINN
-PYTHONPATH=backend/src python -c "from hpe.ai.pinn.trainer import train_pinn_from_bancada; train_pinn_from_bancada(epochs=100)"
-```
+| API | App completo `app.py` + sub-app `main.py` | Producao full vs deploy enxuto v2.0 |
 
 ---
 
 ## Notas de Arquitetura
 
-- **Nunca** substituir surrogate em producao sem versionar no MLflow primeiro
-- **Sempre** registrar runs CFD no `training_log` — regra de ouro do projeto
-- Surrogate e avaliador primario no loop de otimizacao; CFD apenas para validacao final
-- Todos os modulos com fallback gracioso quando dependencias pesadas (CadQuery, Celery, Redis, PyTorch) nao estao instaladas
-- Banco `higra_sigs` e somente leitura — nunca escrever nele
+- **Nunca** substituir surrogate em producao sem versionar no MLflow primeiro.
+- **Sempre** registrar runs CFD no `training_log` — regra de ouro do projeto.
+- Surrogate e avaliador primario no loop de otimizacao; CFD apenas para validacao final.
+- Todos os modulos com fallback gracioso quando dependencias pesadas (CadQuery, Celery, Redis, PyTorch, OpenFOAM/SU2/Ansys) nao estao instaladas.
+- Banco `higra_sigs` e somente leitura — nunca escrever nele.
+- O nome "Pump Engine" e historico: o escopo real cobre bombas, turbinas e pump-turbines.
