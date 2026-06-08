@@ -313,11 +313,17 @@ def _apply_design_point(sizing_bep, design_point) -> "SizingResult":  # type: ig
 
 
 def _trigger_surrogate_retrain() -> Optional[float]:
-    """Disparar retreino do surrogate v1 (XGBoost) com dados recentes."""
-    try:
-        from hpe.ai.surrogate.v1_xgboost import SurrogateV1
-        model = SurrogateV1()
-        metrics = model.train()
-        return float(getattr(metrics, "rmse", 0.0))
-    except Exception as exc:
-        raise RuntimeError(f"Surrogate retrain: {exc}") from exc
+    """Disparar retreino do surrogate v1 (XGBoost) com dados recentes.
+
+    Delega à camada central ``hpe.data.ingest.retrain_surrogate``, que
+    reconstrói a matriz de features combinada (bancada + training_log) e
+    chama ``SurrogateV1.train`` com o ``features_path`` correto.
+
+    NOTA: a versão anterior chamava ``SurrogateV1().train()`` sem o argumento
+    obrigatório ``features_path`` — o retreino sempre falhava.
+    """
+    from hpe.data.ingest import retrain_surrogate
+    report = retrain_surrogate()
+    if report is None:
+        raise RuntimeError("retrain_surrogate retornou None (sem dados ou deps ausentes)")
+    return report.get("rmse_pct")
