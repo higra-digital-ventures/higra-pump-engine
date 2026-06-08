@@ -32,6 +32,7 @@ import RadarChart from './components/RadarChart'
 import DoEPanel from './components/DoEPanel'
 import ParetoPanel from './components/ParetoPanel'
 import LeanSweepPanel from './components/LeanSweepPanel'
+import GeometryModePanel from './components/GeometryModePanel'
 import LETEEditor from './components/LETEEditor'
 import MeridionalDragEditor from './components/MeridionalDragEditor'
 import OptimizationPresets from './components/OptimizationPresets'
@@ -831,6 +832,9 @@ export default function App() {
           {tab === 'lean-sweep' && (
             <LeanSweepPanel defaultFlowRate={opPoint.flowRate / 3600} defaultHead={opPoint.head} defaultRpm={opPoint.rpm} />
           )}
+          {tab === 'geometry-modes' && (
+            <GeometryModePanel flowRate={opPoint.flowRate} head={opPoint.head} rpm={opPoint.rpm} />
+          )}
           {tab === 'doe' && <DoEPanel />}
           {tab === 'pareto' && (
             <ParetoPanel defaultFlowRate={opPoint.flowRate} defaultHead={opPoint.head} defaultRpm={opPoint.rpm} />
@@ -941,7 +945,7 @@ export default function App() {
               )}
             </div>
           )}
-          {!sizing && tab !== 'templates' && tab !== 'pipeline' && tab !== 'cavitation' && tab !== 'cfd_sim' && (
+          {!sizing && tab !== 'templates' && tab !== 'pipeline' && tab !== 'cavitation' && tab !== 'cfd_sim' && tab !== 'geometry-modes' && (
             <EmptyStateHint label="Execute um dimensionamento primeiro para usar esta funcionalidade." />
           )}
         </div>

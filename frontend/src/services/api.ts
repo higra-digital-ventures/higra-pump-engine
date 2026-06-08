@@ -11,6 +11,43 @@ export async function runSizing(flowRate: number, head: number, rpm: number) {
   return res.json()
 }
 
+// --- Geometry modes (classic vs free) ---
+
+export interface GeometryBackendInfo {
+  name: string
+  mode: string | null
+  capabilities: {
+    supports_step: boolean
+    supports_stl: boolean
+    supports_voxel: boolean
+    supports_internal_channels: boolean
+    mesh_strategy: string
+  }
+}
+
+export async function listGeometryBackends(): Promise<GeometryBackendInfo[]> {
+  const res = await fetch(`${API_BASE}/geometry/backends`)
+  if (!res.ok) throw new Error(`Backends failed: ${res.status}`)
+  const data = await res.json()
+  return data.backends ?? []
+}
+
+export async function generateGeometryMode(
+  flowRate: number, head: number, rpm: number, mode: string, exportFiles = false,
+) {
+  const res = await fetch(`${API_BASE}/geometry/generate`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ Q: flowRate, H: head, n: rpm, mode, export: exportFiles }),
+  })
+  if (res.status === 501) {
+    const body = await res.json().catch(() => ({}))
+    throw new Error(body.detail || 'Modo não implementado')
+  }
+  if (!res.ok) throw new Error(`Geometry generate failed: ${res.status}`)
+  return res.json()
+}
+
 export async function getCurves(flowRate: number, head: number, rpm: number, nPoints = 25) {
   const res = await fetch(`${API_BASE}/curves`, {
     method: 'POST',
